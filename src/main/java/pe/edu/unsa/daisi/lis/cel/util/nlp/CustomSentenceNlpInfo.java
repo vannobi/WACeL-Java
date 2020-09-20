@@ -13,6 +13,7 @@ import java.util.Map;
  *
  */
 public class CustomSentenceNlpInfo {
+	Integer numSentences;
 	List<CustomToken> tokens;
 	HashMap<Integer, CustomToken> subjects;//key = position of token in sentence
 	HashMap<Integer, CustomToken> directObjects;//key = position of token in sentence
@@ -22,11 +23,12 @@ public class CustomSentenceNlpInfo {
 	HashMap<Integer, CustomToken> complementSubjects;//key = position of token in sentence, clause complement with (ccomp) its own subject
 	HashMap<Integer, CustomToken> modifierActionVerbs;//VB is a clause which modifies a noun, verb or other predicate(adjective, etc)
 	HashMap<Integer, CustomToken> modifierSubjects;//key = position of token in sentence, relative clause modifier of a noun with (acl:relcl) its own subject
-	public CustomSentenceNlpInfo(List<CustomToken> tokens, HashMap<Integer, CustomToken> subjects,
+	public CustomSentenceNlpInfo(Integer numSentences, List<CustomToken> tokens, HashMap<Integer, CustomToken> subjects,
 			HashMap<Integer, CustomToken> directObjects, HashMap<Integer, CustomToken> indirectObjects, HashMap<Integer, CustomToken> mainActionVerbs,
 			HashMap<Integer, CustomToken> complementActionVerbs, HashMap<Integer, CustomToken> complementSubjects, 
 			HashMap<Integer, CustomToken> modifierActionVerbs, HashMap<Integer, CustomToken> modifierSubjects) {
 		super();
+		this.numSentences = numSentences;
 		this.tokens = tokens;
 		this.subjects = subjects;
 		this.directObjects = directObjects;
@@ -37,6 +39,18 @@ public class CustomSentenceNlpInfo {
 		this.modifierActionVerbs = modifierActionVerbs;	
 		this.modifierSubjects = modifierSubjects;
 	}
+	
+	
+	public Integer getNumSentences() {
+		return numSentences;
+	}
+
+
+	public void setNumSentences(Integer numSentences) {
+		this.numSentences = numSentences;
+	}
+
+
 	public List<CustomToken> getTokens() {
 		return tokens;
 	}

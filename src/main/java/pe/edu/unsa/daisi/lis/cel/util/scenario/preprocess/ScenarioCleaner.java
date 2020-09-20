@@ -21,9 +21,9 @@ public class ScenarioCleaner {
 	public static final String WHITESPACE_CHAR = " ";
 	
 	//BRACKETS
-	public static final String REGEX_PARENTHESES = "\\(.*\\)";
-	public static final String REGEX_BRACKETS = "\\[.*\\]";
-	public static final String REGEX_BRACES = "\\{.*\\}";
+	public static final String REGEX_PARENTHESES = "\\((\\w\\s*)*\\)";//"\\(.*\\)";
+	public static final String REGEX_BRACKETS = "\\[(\\w\\s*)*\\]";//"\\[.*\\]";
+	public static final String REGEX_BRACES = "\\{(\\w\\s*)*\\}";//"\\{.*\\}";
 	
 	//HTML TAGS
 	public static final String REGEX_HTML_TAGS = "<(.|\\n)+?>"; //"(<[^<>]*>)"; //Ex. <a> .... </a>

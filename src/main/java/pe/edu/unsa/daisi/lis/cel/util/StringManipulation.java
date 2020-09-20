@@ -2,6 +2,7 @@ package pe.edu.unsa.daisi.lis.cel.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,23 @@ public final class StringManipulation {
 		return words.length;
 	}
 	
+	public static int getNumberOfSentences(String sentence) {
+		// We add the "." for the sentence extractor to pick the last sentence,
+		// if it does not end with a punctuation mark.
+		sentence = sentence + ".";
+		//test how many sentences
+		String wordDelimiters = ".!?"; // ".!?:;";
+		StringTokenizer tokenSentence = new StringTokenizer(sentence, wordDelimiters);
+		int l = tokenSentence.countTokens();	
+		
+		if (l > 0)
+			return l;
+		else if (sentence.length() > 0)
+			return 1;
+		else
+			return 0;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println(getUpperCasePhrases(" #HOLA AS.   MUND_H__AS.,. o adshBASBANMB ASDJKSahdjk HI_VB"));
 		System.out.println(getUpperCasePhrases("#HOLA AAA. ASAS"));
@@ -66,5 +84,18 @@ public final class StringManipulation {
 		} else {
 			System.out.println("no match");
 		}
+		
+		text = "If the user is already registered, the system automatically updates news messages from subscribed channels (refer to DOWNLOAD NEWS use case). If no, the system attempts to REGISTER A NEW USER (refer to Register a new user use case)";
+		System.out.println(getNumberOfSentences(text));
+		
+		String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + "she" + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
+		String replacement = "<mark>" + "she" + "</mark>"; 
+			String title = "User selects the channels he/she wants to subscribe and/or deselects already subscribed channels to unsubscribe them and chooses the Change subscription options";
+			title = ScenarioCleaner.cleanSentence(title.toLowerCase());
+			String newTitle = title.replaceAll(regExpWord, replacement);
+			if (!newTitle.equals(title)) {
+				System.out.println("Implict SHE");
+		}
+		
 	}
 }

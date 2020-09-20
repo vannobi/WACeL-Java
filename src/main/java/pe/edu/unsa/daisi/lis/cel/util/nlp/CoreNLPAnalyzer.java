@@ -13,6 +13,7 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -24,6 +25,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import pe.edu.unsa.daisi.lis.cel.util.RegularExpression;
+import pe.edu.unsa.daisi.lis.cel.util.StringManipulation;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioCleaner;
 
 /**
@@ -148,8 +150,13 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 		
 		text = improveTextForNLP(text);
 		
+		
+		// Create a document. No computation is done yet.
+        Integer numSentences = StringManipulation.getNumberOfSentences(text);
+		
 		//Get tokens with Adjusted POS tags
 		List<CustomToken> sentenceTokens = getTokens(text); //using Simple Core NLP:
+		
 		
 		//Tokenize
 		List<CoreLabel> wordList = tokenizerFactory.getTokenizer(new StringReader(text)).tokenize();
@@ -167,6 +174,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 		GrammaticalStructure grammaticalStructure = grammaticalStructureFactory.newGrammaticalStructure(parseTree);
 		List<TypedDependency> typedDependencyList = (List<TypedDependency>) grammaticalStructure.typedDependencies();//gs.typedDependenciesCCprocessed(true);
 
+		//System.out.println(text);
 		System.out.println(typedDependencyList.toString());
 		//Identification of Subject and Object roles: Algorithm
 		//https://www.researchgate.net/publication/50235327_Extracting_Noun_Phrases_in_Subject_and_Object_Roles_for_Exploring_Text_Semantics
@@ -237,7 +245,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 						//Subject
 						token = new CustomToken(nModRel.dep().word(), nModRel.dep().tag(), nModRel.dep().lemma(), nModRel.dep().index());
 						subjectTokens.put(token.getIndex(), token);
-					}
+					}					
 					
 				}
 			}
@@ -336,6 +344,19 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 						//Subject
 						token = new CustomToken(nSubjRel.dep().word(), nSubjRel.dep().tag(), nSubjRel.dep().lemma(), nSubjRel.dep().index());
 						subjectTokens.put(token.getIndex(), token);
+					} else {
+						TypedDependency nSubjPassRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT.getShortName(), typedDependency.gov().word(), typedDependency.gov().index(), null, 0);
+						if(nSubjPassRel == null) {
+											
+							//Action-Verb
+							CustomToken token = new CustomToken(typedDependency.gov().word(), typedDependency.gov().tag(), typedDependency.gov().lemma(), typedDependency.gov().index());
+							//if(mainActionVerbTokens.isEmpty())
+								mainActionVerbTokens.put(token.getIndex(), token);
+							//Indirect-Object
+							token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
+							indirectObjectTokens.put(token.getIndex(), token);
+							
+						}
 					}
 					
 				}
@@ -409,7 +430,6 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 							//Concatenate to close (index-1) previous object
 							CustomToken prevObject = directObjectTokens.remove(lastSubject.getIndex() - 1);
 							if(prevObject != null) {
-								System.out.println(prevObject.getWord());
 								prevObject.setWord(prevObject.getWord() + WHITE_SPACE + lastSubject.getWord());
 								prevObject.setStem(prevObject.getStem() + WHITE_SPACE + lastSubject.getStem());
 								prevObject.setIndex(lastSubject.getIndex());
@@ -426,47 +446,10 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 			}
 		}
 		
-		//Extract subjects, direct/indirect objects and action-verbs by conjunction (and/or) and nominal modifier relations
+		//Extract subjects, direct/indirect objects and action-verbs bynominal modifier relations
 		for(TypedDependency typedDependency : typedDependencyList) {
-			//SVOR8:	Extract subject, direct-object or indirect-object from conj
-			//“User informs their login and password” --> [nsubj(informs-2, user-1), root(ROOT-0, informs-2), nmod:poss(login-4, their-3), dobj(informs-2, login-4), cc(login-4, and-5), conj(login-4, password-6)]
-			//IF relation is CONJUNCT (and/or) and governor is NOUN and dependent is NOUN THEN Put dependent in Subjects or Objects
-			if(typedDependency.reln().getShortName().equals(EnglishGrammaticalRelations.CONJUNCT.getShortName())) {
-				if(typedDependency.gov().tag().contains(PosTagEnum.NN.name()) && typedDependency.dep().tag().contains(PosTagEnum.NN.name())) {
-//					System.out.print("- relation: " + typedDependency.reln().getShortName());
-//					System.out.print("- Subject: " + typedDependency.dep() + " - " +typedDependency.dep().index());//check NN
-//					System.out.println("- Subject: " + typedDependency.gov() + " - " +typedDependency.gov().index());//check NN
-					CustomToken token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
-					//IF governor is in Subjects THEN Put dependent in Subjects
-					if(subjectTokens.containsKey(typedDependency.gov().index())) {
-						subjectTokens.put(token.getIndex(), token);
-					}
-					//IF governor is in Objects THEN Put dependent in Objects
-					else if(directObjectTokens.containsKey(typedDependency.gov().index())) {
-						directObjectTokens.put(token.getIndex(), token);
-					}
-					else if(indirectObjectTokens.containsKey(typedDependency.gov().index())) {
-						indirectObjectTokens.put(token.getIndex(), token);
-					}
-				}
-			}
-
-			//SVOR9:	Extract action-verb, complement-action-verb or modifier-action-verb from conj
-			//“User register or delete transactions” --> [nsubj(register-2, user-1), root(ROOT-0, register-2), cc(register-2, or-3), conj(register-2, delete-4), dobj(delete-4, trans-actions-5)]
-			//IF relation is CONJUNCT (and/or) and governor is VERB and dependent is VERB THEN Put dependent in Action-Verbs
-			if(typedDependency.reln().getShortName().equals(EnglishGrammaticalRelations.CONJUNCT.getShortName())) {
-				if(typedDependency.gov().tag().contains(PosTagEnum.VB.name()) && typedDependency.dep().tag().contains(PosTagEnum.VB.name())) {
-//					System.out.print("- relation: " + typedDependency.reln().getShortName());
-//					System.out.print("- Verb: " + typedDependency.dep() + " - " +typedDependency.dep().index());//check NN
-//					System.out.println("- Verb: " + typedDependency.gov() + " - " +typedDependency.gov().index());//check NN
-					CustomToken token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
-					mainActionVerbTokens.put(token.getIndex(), token);
-
-				}
-			}
-
-			
-			//SVOR10:	Update subject, direct-object or indirect-object from dobj, case and nmod
+		
+			//SVOR8:	Update subject, direct-object or indirect-object from dobj, case and nmod
 			//“system displays set of possible criteria” --> [nsubj(displays-2, system-1), root(ROOT-0, displays-2), dobj(displays-2, set-3), case(criteria-6, of-4), amod(criteria-6, possible-5), nmod(set-3, criteria-6)]
 			//IF relation is NOMINAL_MODIFIER and governor is NOUN and dependent is NOUN THEN Put dependent in Subjects or Objects
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER.getShortName())) {
@@ -511,7 +494,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 
 		//Update multiword subjects, direct/indirect objects and phrasal verbs
 		for(TypedDependency typedDependency : typedDependencyList) {
-			//SVOR11:	Update multiword subject, direct-object or indirect-object from compound relationship
+			//SVOR9:	Update multiword subject, direct-object or indirect-object from compound relationship
 			//"The broker system broadcasts the order" --> --> [det(system-3, the-1), com-pound(system-3, broker-2), nsubj(broadcasts-4, system-3), root(ROOT-0, broadcasts-4), det(order-6, the-5), dobj(broadcasts-4, order-6)]
 			//IF relation is COMPOUND_MODIFIER and governor is NOUN and dependent is NOUN THEN Concatenate dependent and governor in governor and Put it in Subjects or Objects
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER.getShortName())) {
@@ -546,7 +529,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 					}
 				}    	   
 			}
-			//SVOR12:	Update multiword subject, direct-object or indirect-object from nmod:poss relationship
+			//SVOR10:	Update multiword subject, direct-object or indirect-object from nmod:poss relationship
 			//"Broker system broadcasts customer's information" --> [compound(system-2, broker-1), nsubj(broadcasts-3, system-2), root(ROOT-0, broadcasts-3), nmod:poss(information-6, customer-4), case(customer-4, 's-5), dobj(broadcasts-3, information-6)]
 			//IF relation is POSSESSION_MODIFIER and governor is NOUN and dependent is NOUN THEN Concatenate dependent and POSSESIVE and governor in governor and Put it in Subjects or Objects
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER.getShortName())) {
@@ -570,7 +553,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 
 			}
 			
-			//SVOR13:	Update multiword subject, direct-object or indirect-object from nummod relationship
+			//SVOR11:	Update multiword subject, direct-object or indirect-object from nummod relationship
 			//"system return to the step 1.1"  --> [root(ROOT-0, system-1), dep(system-1, return-2), case(step-5, to-3), det(step-5, the-4), nmod(return-2, step-5), nummod(step-5, 1.1-6)]
 			//IF relation is NUMERIC_MODIFIER and governor is NOUN and dependent is CARDINAL_NUMBER THEN Concatenate dependent and governor in governor and Put it in Subjects or Objects
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.NUMERIC_MODIFIER.getShortName())) {
@@ -620,7 +603,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 			
 
 			//UPDATE ACTION-VERBS
-			//SVOR14:	Update multiword action-verb from compound:prt relationship
+			//SVOR12:	Update multiword action-verb from compound:prt relationship
 			//"the broker system carry out the order" --> [det(system-3, the-1), com-pound(system-3, broker-2), nsubj(carry-4, system-3), root(ROOT-0, carry-4), com-pound:prt(carry-4, out-5), det(order-7, the-6), dobj(carry-4, order-7)]
 			//IF relation is PHRASAL_VERB_PARTICLE and governor is VERB and dependent is VERB PARTICLE THEN Concatenate governor and dependent in governor and Put it in Action-Verbs
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.PHRASAL_VERB_PARTICLE.getShortName())) {
@@ -642,7 +625,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 			
 			//UPDATE ACTION-VERBS
 			//ADD COMPLEMENT AND MODIFIER ACTION-VERBS
-			//SVOR15:	Update action-verb from xcomp relationship
+			//SVOR13:	Update action-verb from xcomp relationship
 			//"User wants to change his pin" --> [nsubj(wants-2, user-1), root(ROOT-0, wants-2), mark(change-4, to-3), xcomp(wants-2, change-4), nmod:poss(pin-6, his-5), dobj(change-4, pin-6)]
 			//IF relation is XCLAUSAL_COMPLEMENT and governor is VERB and dependent is VERB (NO VBG) THEN Remove dependent from Action-Verbs AND Put dependent in Complement-Action-Verbs
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.XCLAUSAL_COMPLEMENT.getShortName()) ) {
@@ -659,7 +642,7 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 				}
 			}
 			
-			//SVOR16:	Update action-verb from ccomp relationship
+			//SVOR14:	Update action-verb from ccomp relationship
 			//"ATM verifies with the Bank that the User has enough money in account" --> [nsubj(verifies-2, atm-1), root(ROOT-0, verifies-2), case(bank-5, with-3), det(bank-5, the-4), nmod(verifies-2, bank-5), mark(has-9, that-6), det(user-8, the-7), nsubj(has-9, user-8), ccomp(verifies-2, has-9), amod(money-11, enough-10), dobj(has-9, money-11), case(account-13, in-12), nmod(money-11, account-13)]
 			//IF relation is CLAUSAL_COMPLEMENT and governor is VERB and dependent is VERB (NO VBG) THEN Remove dependent from Action-Verbs AND Put dependent in Complement-Action-Verbs
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.CLAUSAL_COMPLEMENT.getShortName()) ) {
@@ -674,24 +657,36 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 					complementActionVerbTokens.put(token.getIndex(), token);
 					//IF rel is CCOMP THEN remove subject from Subjects and PUT into ComplementSubjects: complement verb with its own subject
 					//Get nsubj rel with gov equal to current dep (ccomp(gov, dep)) 
-					String REGEX_NSUBJ = ".*(nsubj\\("+typedDependency.dep().word()+"\\-\\d+\\,\\s(\\w+)\\-(\\d+)\\)).*";
-					Matcher matcherNSubj = Pattern.compile(REGEX_NSUBJ).matcher(typedDependencyList.toString());
-					if (matcherNSubj.matches()) {
-						String subject = matcherNSubj.group(2);
-						String subjectIndex = matcherNSubj.group(3);
-						// remove subject from Subjects and PUT into ComplementSubjects
-						if (subject != null && !subject.isEmpty() ) {
-							CustomToken complementSubjectToken = null;
-							if(subjectTokens.containsKey(new Integer(subjectIndex))) {
-								complementSubjectToken = subjectTokens.remove(new Integer(subjectIndex));
+					TypedDependency nSubjRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT.getShortName(), typedDependency.dep().word(), typedDependency.dep().index(), null, 0);
+					if (nSubjRel != null) {
+						CustomToken complementSubjectToken = new CustomToken(nSubjRel.dep().word(), nSubjRel.dep().tag(), nSubjRel.dep().lemma(), nSubjRel.dep().index());
+						if(subjectTokens.containsKey(nSubjRel.dep().index())) 
+							subjectTokens.remove(nSubjRel.dep().index());
+						complementSubjectTokens.put(complementSubjectToken.getIndex(), complementSubjectToken);
+						
+					} 
+					else {
+						TypedDependency nSubjPassjRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT.getShortName(), typedDependency.dep().word(), typedDependency.dep().index(), null, 0);
+						if (nSubjPassjRel != null) {
+							TypedDependency nModRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER.getShortName(), typedDependency.dep().word(), typedDependency.dep().index(), null, 0);
+							if(nModRel != null) {
+								CustomToken complementSubjectToken = new CustomToken(nModRel.dep().word(), nModRel.dep().tag(), nModRel.dep().lemma(), nModRel.dep().index());
+								if(subjectTokens.containsKey(nModRel.dep().index())) {
+									subjectTokens.remove(nModRel.dep().index());
+									
+								}
 								complementSubjectTokens.put(complementSubjectToken.getIndex(), complementSubjectToken);
+								
 							}
+							
+							
+							
 						}
 					}
 				}
 			}
 		
-			//SVOR17:	Update action-verb from advcl relationship
+			//SVOR15:	Update action-verb from advcl relationship
 			//"user select option for adding new clients" --> ..., advcl(select-2, adding-5), amod(clients-7, new-6), dobj(adding-5, clients-7), , ...
 			//IF relation is ADV_CLAUSE_MODIFIER (MODIFY A VERB) and governor is VERB (NO VBG) and dependent is VERB (can be VBG) THEN Remove dependent from Action-Verbs  AND Put dependent from Modifier-Action-Verbs AND Put governor in Action-Verbs
 			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER.getShortName())) {
@@ -711,6 +706,40 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 				}
 			}
 			
+			//SVOR16:	Update subject, direct-object and action-verb from  root, nsubj, and advcl relationships
+			//"Use case ends when user logs out or selects different option" 
+			//[compound(case-2, use-1), nsubj(ends-3, case-2), root(ROOT-0, ends-3), advmod(logs-6, when-4), nsubj(logs-6, user-5), advcl(ends-3, logs-6), com-pound:prt(logs-6, out-7), cc(logs-6, or-8), conj(logs-6, selects-9), amod(option-11, different-10), dobj(selects-9, option-11)]
+			//IF relation is ADV_CLAUSE_MODIFIER (MODIFY A VERB) and governor is VERB (NO VBG) and dependent is VERB (can be VBG) THEN Remove dependent from Action-Verbs  AND Put dependent from Modifier-Action-Verbs AND Put governor in Action-Verbs
+			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER.getShortName())) {
+				if(typedDependency.gov().tag().contains(PosTagEnum.VB.name()) && !typedDependency.gov().tag().equals(PosTagEnum.VBG.name()) && typedDependency.dep().tag().contains(PosTagEnum.VB.name()) ) {				//					System.out.print("- relation: " + typedDependency.reln().getShortName());
+//					System.out.print("- relation: " + typedDependency.reln().getShortName());
+//					System.out.print("- Verb: " + typedDependency.gov() + " - " +typedDependency.gov().index());//check  VB, VBP, VBZ, NO VBG
+//					System.out.println("- verb modifier: " + typedDependency.dep() + " - " +typedDependency.dep().index());//VB, VBP, VBZ, VBN?
+					TypedDependency nSubjRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT.getShortName(), typedDependency.dep().word(), typedDependency.dep().index(), null, 0);
+					if(nSubjRel != null) {
+						//FIX
+						TypedDependency rootRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, GrammaticalRelation.ROOT.getShortName(), null, 0, typedDependency.gov().word(), typedDependency.gov().index());
+						if (rootRel != null) {
+
+							//Action-Verb
+							if(mainActionVerbTokens.containsKey(typedDependency.dep().index()))
+								mainActionVerbTokens.remove(typedDependency.dep().index());
+							CustomToken token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
+							modifierActionVerbTokens.put(token.getIndex(), token);
+							
+							//Modifier-Subject
+							if(subjectTokens.containsKey(nSubjRel.dep().index()))
+								subjectTokens.remove(nSubjRel.dep().index());
+							token = new CustomToken(nSubjRel.dep().word(), nSubjRel.dep().tag(), nSubjRel.dep().lemma(), nSubjRel.dep().index());
+							modifierSubjectTokens.put(token.getIndex(), token);
+
+						}
+					}
+
+				}
+			}
+
+			
 			//SVOR17:	Update action-verb from acl relationship
 			//"user signals the system to proceed the transaction" --> ..., mark(proceed-6, to-5), acl(system-4, proceed-6), det(transaction-8, the-7), dobj(proceed-6, transaction-8), , ...
 			//IF relation is CLAUSAL_MODIFIER (MODIFY A NOUN) and governor is NOUN and dependent is VERB (NO VBG???) THEN Remove dependent from Action-Verbs AND Put dependent from Modifier-Action-Verbs
@@ -728,6 +757,44 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 				}
 			}
 			
+			//SVOR18:	Update subject, direct-object and action-verb from nsubjpass dobj and acl relationships
+			//"User select a client for whom new contract will be added"
+			// [nsubj(select-2, user-1), root(ROOT-0, select-2), det(client-4, a-3), dobj(select-2, client-4), mark(added-11, for-5), dobj(added-11, whom-6), amod(contract-8, new-7), nsub-jpass(added-11, contract-8), aux(added-11, will-9), auxpass(added-11, be-10), acl(client-4, added-11)]
+			//IF relation is CLAUSAL_MODIFIER (MODIFY A NOUN) and governor is NOUN and dependent is VERB (NO VBG???) THEN Remove dependent from Action-Verbs AND Put dependent from Modifier-Action-Verbs
+			if(typedDependency.reln().getShortName().equals(UniversalEnglishGrammaticalRelations.CLAUSAL_MODIFIER.getShortName())) {
+				//if(typedDependency.gov().tag().contains(PosTag.NN.name()) && !typedDependency.dep().tag().equals(PosTag.VBG.name()) && typedDependency.dep().tag().contains(PosTag.VB.name()) ) {
+				if(typedDependency.gov().tag().contains(PosTagEnum.NN.name()) &&  typedDependency.dep().tag().contains(PosTagEnum.VB.name()) ) {
+					//					System.out.print("- relation: " + typedDependency.reln().getShortName());
+					//					System.out.print("- Noun: " + typedDependency.gov() + " - " +typedDependency.gov().index());//check  NN
+					//					System.out.println("- Verb: noun modifier: " + typedDependency.dep() + " - " +typedDependency.dep().index());//VB, VBP, VBZ, NO VBG
+					//IF dependent is into Action-Verbs THEN Remove existing dependent
+					TypedDependency dObjRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.DIRECT_OBJECT.getShortName(), typedDependency.dep().word(), typedDependency.dep().index(), null, 0);
+					if(dObjRel != null) {
+						//FIX
+
+						TypedDependency nSubjPassjRel = findTypedDependecyByRelationGovOrDep(typedDependencyList, UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT.getShortName(), typedDependency.dep().word(), typedDependency.dep().index(), null, 0);
+						if (nSubjPassjRel != null) {
+
+							//Action-Verb
+							if(mainActionVerbTokens.containsKey(typedDependency.dep().index()))
+								mainActionVerbTokens.remove(typedDependency.dep().index());
+							CustomToken token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
+							modifierActionVerbTokens.put(token.getIndex(), token);
+							
+							//Direct-Object --> Modifier-Subject
+							token = new CustomToken(dObjRel.dep().word(), dObjRel.dep().tag(), dObjRel.dep().lemma(), dObjRel.dep().index());
+							modifierSubjectTokens.put(token.getIndex(), token);
+
+							//Modifier-Subject - Direct-Object
+							token = new CustomToken(nSubjPassjRel.dep().word(), nSubjPassjRel.dep().tag(), nSubjPassjRel.dep().lemma(), nSubjPassjRel.dep().index());
+							directObjectTokens.put(token.getIndex(), token);
+						}
+					}
+				}
+			}
+
+
+			//SVOR19: Update action-verb from acl:relcl relationship	
 			//User confirms he/she wants to register
 			//Administrator chooses a group containing the channel he wants to delete	--> ..., nsubj(wants-9, he-8), acl:relcl(channel-7, wants-9), mark(delete-11, to-10)
 			//IF relation is RELATIVE_CLAUSE_MODIFIER and governor is NOUN and dependent is VERB (NO VBG) THEN Remove dependent from Action-Verbs AND Put dependent in Modifier-Action-Verbs
@@ -758,6 +825,67 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 						}
 					}
 				}
+			}		
+			
+
+			
+		}
+		//Update subjects, direct/indirect objects and verbs by conjunction (and/or)
+		for(TypedDependency typedDependency : typedDependencyList) {
+			
+			//SVOR20:	Extract subject, direct-object or indirect-object from conj
+			//“User informs their login and password” --> [nsubj(informs-2, user-1), root(ROOT-0, informs-2), nmod:poss(login-4, their-3), dobj(informs-2, login-4), cc(login-4, and-5), conj(login-4, password-6)]
+			//IF relation is CONJUNCT (and/or) and governor is NOUN and dependent is NOUN THEN Put dependent in Subjects or Objects
+			if(typedDependency.reln().getShortName().equals(EnglishGrammaticalRelations.CONJUNCT.getShortName())) {
+				if((typedDependency.gov().tag().contains(PosTagEnum.NN.name()) || typedDependency.gov().tag().contains(PosTagEnum.PRP.name())) && (typedDependency.dep().tag().contains(PosTagEnum.NN.name()) || typedDependency.dep().tag().contains(PosTagEnum.PRP.name()))) {
+//					System.out.print("- relation: " + typedDependency.reln().getShortName());
+//					System.out.print("- Subject: " + typedDependency.dep() + " - " +typedDependency.dep().index());//check NN
+//					System.out.println("- Subject: " + typedDependency.gov() + " - " +typedDependency.gov().index());//check NN
+					CustomToken token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
+					//IF governor is in Subjects THEN Put dependent in Subjects
+					if(subjectTokens.containsKey(typedDependency.gov().index())) {
+						
+						subjectTokens.put(token.getIndex(), token);
+					}
+					//IF governor is in Objects THEN Put dependent in Objects
+					else if(directObjectTokens.containsKey(typedDependency.gov().index())) {
+						directObjectTokens.put(token.getIndex(), token);
+					}
+					else if(indirectObjectTokens.containsKey(typedDependency.gov().index())) {
+						indirectObjectTokens.put(token.getIndex(), token);
+					}
+					else if(modifierSubjectTokens.containsKey(typedDependency.gov().index())) {
+						modifierSubjectTokens.put(token.getIndex(), token);
+					}
+				}
+			}
+			
+			//SVOR21:	Extract action-verb, complement-action-verb or modifier-action-verb from conj
+			//“User register or delete transactions” --> [nsubj(register-2, user-1), root(ROOT-0, register-2), cc(register-2, or-3), conj(register-2, delete-4), dobj(delete-4, trans-actions-5)]
+			//IF relation is CONJUNCT (and/or) and governor is VERB and dependent is VERB THEN Put dependent in Action-Verbs
+			if(typedDependency.reln().getShortName().equals(EnglishGrammaticalRelations.CONJUNCT.getShortName())) {
+				if(typedDependency.gov().tag().contains(PosTagEnum.VB.name()) && typedDependency.dep().tag().contains(PosTagEnum.VB.name())) {
+//					System.out.print("- relation: " + typedDependency.reln().getShortName());
+//					System.out.print("- Verb: " + typedDependency.dep() + " - " +typedDependency.dep().index());//check NN
+//					System.out.println("- Verb: " + typedDependency.gov() + " - " +typedDependency.gov().index());//check NN
+					
+					CustomToken token = new CustomToken(typedDependency.dep().word(), typedDependency.dep().tag(), typedDependency.dep().lemma(), typedDependency.dep().index());
+					if(mainActionVerbTokens.containsKey(typedDependency.gov().index()))
+						mainActionVerbTokens.put(token.getIndex(), token);
+					else if(complementActionVerbTokens.containsKey(typedDependency.gov().index())) {
+						if(mainActionVerbTokens.containsKey(typedDependency.dep().index()))
+							mainActionVerbTokens.remove(typedDependency.dep().index());
+						complementActionVerbTokens.put(token.getIndex(), token);
+					
+					}
+					else if(modifierActionVerbTokens.containsKey(typedDependency.gov().index())) {
+						if(mainActionVerbTokens.containsKey(typedDependency.dep().index()))
+							mainActionVerbTokens.remove(typedDependency.dep().index());
+						modifierActionVerbTokens.put(token.getIndex(), token);
+					
+					}	
+					
+				}
 			}
 			
 			//IF relation is SEMANTIC_DEPENDENT and governor is VERB  and dependent is VERB THEN Remove dependent from Action-Verbs AND Put dependent from Modifier-Action-Verbs
@@ -773,10 +901,13 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 					modifierActionVerbTokens.put(token.getIndex(), token);
 				}
 			}
+			
+			
+
 
 		}
 
-		customSentenceNlpInfo = new CustomSentenceNlpInfo(sentenceTokens, subjectTokens, directObjectTokens, indirectObjectTokens, mainActionVerbTokens, complementActionVerbTokens, complementSubjectTokens, modifierActionVerbTokens, modifierSubjectTokens);
+		customSentenceNlpInfo = new CustomSentenceNlpInfo(numSentences, sentenceTokens, subjectTokens, directObjectTokens, indirectObjectTokens, mainActionVerbTokens, complementActionVerbTokens, complementSubjectTokens, modifierActionVerbTokens, modifierSubjectTokens);
 
 		return customSentenceNlpInfo;
 	}
@@ -832,139 +963,13 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
     	text = text.toLowerCase();
 		text = text.replaceAll(REG_EXP_OTHER_POSSESSIVE_CANDIDATES, POSSESSIVE);
 		//REPLACE words between '/' by second text; Ex. User selects/deletes the channels -> deletes
-		text = ScenarioCleaner.replaceWordsBetweenSlashBySecondWord(text);
+		text = ScenarioCleaner.replaceWordsBetweenSlashBySecondWord(text);//FIX: Improve to get both
 		//REMOVE SPECIAL punctuation at the end
 		text = text.replaceAll(RegularExpression.REGEX_PUNCTUATION_SPECIAL_AT_END_LINE, "");
 		return text;
     }
     
-    public static void main(String[] args) {
-		//System.out.println(isPlural("exercices"));
-		//System.out.println(isPlural("shoe"));
-		
-		//System.out.println(getVerbBaseFromThirdPerson("gets"));
-		
-		
-		INLPAnalyzer nlpAnalyzer = CoreNLPAnalyzer.getInstance();//singleton
-		
-		
-		
-		//String text1 ="System sends the server a  registration request";
-		//String text1 = "broker system carry out  customer's information to suppliers";
-		//String text1 = "User fills all required personal client data forms";
-		//String text1 ="User creates filter for searching";
-		//String text1 ="System sends a registration request to the server";
-		
-		//String text1 = "System sends to the server of the amazon a registration request";
-		
-		//String text1 = "system saves the data in repository";
-		
-		//String text1 = "system gets data from repository";
-		
-		//String text1 = "Administrator types the name of the channel and the URL of the news service and selects Add channel";
-		
-		//String text1 = "system prints the name of the user";
-		
-		//String text1 = "selects envelope";
-		//String text1 = "file was updated by the user";
-		//String text1 = "user clicks on the screen";
-		
-		//String text1 = "user clicks the mouse on the screen";
-		
-		
-		//String text1 = "Customer examines the bid";
-		//String text1="I really  like it";
-		//String text1 ="The system informs the user that the battery is full";
-		//String text1 ="The system sends the user an email";
-		
-		//String text1 ="system returns to step 1.1";
-		//String text1 ="system go to step 1";
-		//String text1 = "User fills 3 forms";
-		
-		//String text1 ="User informs their login and password";
-		//String text1 ="User register or delete transactions";
-		
-		//String text1 ="system displays the numbers about the set of possible criteria";
-		
-		//String text1 ="system displays set of possible criteria";
-		
-		
-		//String text1 = "Set of users register forms";
-		//String text1 = "I love French fries";
-		
-		//String text1 = "The Broker system broadcasts the order";
-		//String text1 ="Broker system broadcasts customer's information";
-		
-		//String text1 = "The broker system carry out the order";
-		
-		//String text1 = "user log in to the system";
-		
-		//String text1 = "user wants to change his pin";
-		
-		//String text1 = "ATM verifies with the Bank that the User has enough money in account";
 
-		//String text1 ="user select option for adding new clients";
-		
-		//String text1 ="user signals the system to proceed the transaction";
-		
-		//String text1 = "Administrator chooses a group containing the channel he wants to delete";
-		
-		//String text1 = "The system shall send a message to the receiver, and it provides an acknowledge message";
-		//String text1 = "The system shall send a message to the receiver, and it provides an acknowledgement message";
-		
-		//String text1 = "The System receives news messages and stores them in a local database";
-		
-		//String text1 ="user register everyone";
-		String text1 ="user informs her login";
-		
-		
-		
-		nlpAnalyzer.getTokens(text1);
-		CustomSentenceNlpInfo nlpInfo = nlpAnalyzer.getSentenceComponents(text1);
-		HashMap<Integer, CustomToken> subjectTokens = nlpInfo.getSubjects();
-		HashMap<Integer, CustomToken> mainActionVerbTokens = nlpInfo.getMainActionVerbs();
-		HashMap<Integer, CustomToken> complementActionVerbTokens = nlpInfo.getComplementActionVerbs();
-		HashMap<Integer, CustomToken> complementSubjectTokens = nlpInfo.getComplementSubjects();
-		HashMap<Integer, CustomToken> modifierActionVerbTokens = nlpInfo.getModifierActionVerbs();
-		HashMap<Integer, CustomToken> modifierSubjectTokens = nlpInfo.getModifierSubjects();
-		HashMap<Integer, CustomToken> directObjectTokens = nlpInfo.getDirectObjects();
-		HashMap<Integer, CustomToken> indirectObjectTokens = nlpInfo.getIndirectObjects();
-		
-		// Displaying HashMap elements
-				System.out.println("Subjects HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : subjectTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Action-Verbs HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : mainActionVerbTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Complement Action-Verbs HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : complementActionVerbTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Complement Subjects HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : complementSubjectTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Modifier Action-Verbs HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : modifierActionVerbTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Modifier Subjects HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : modifierSubjectTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Direct Objects HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : directObjectTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-				System.out.println("Indirect Objects HashMap contains: ");
-				for (Map.Entry<Integer, CustomToken> entry : indirectObjectTokens.entrySet()) {
-					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
-				}
-		
-    }
 
 	@Override
 	public List<CustomToken> getTokensWithChunkTypes(List<CustomToken> tokens) {

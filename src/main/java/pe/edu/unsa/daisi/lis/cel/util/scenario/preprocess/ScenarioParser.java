@@ -211,8 +211,10 @@ public class ScenarioParser {
 						StructuredEpisode structuredEpisodeTmp = new StructuredEpisode();
 						structuredEpisodeTmp = (StructuredEpisode) extractExplicitConstraints(episode, structuredEpisodeTmp);
 						episode = ((StructuredEpisode) structuredEpisodeTmp).getSentence();
+						/*
 						if(((StructuredEpisode) structuredEpisodeTmp).getConstraints() == null|| ((StructuredEpisode) structuredEpisodeTmp).getConstraints().isEmpty())
 							structuredEpisodeTmp = (StructuredEpisode) extractNonExplicitConstraints(episode, structuredEpisodeTmp);
+							*/
 						episode = ((StructuredEpisode) structuredEpisodeTmp).getSentence();
 						structuredEpisode.setConstraints(((StructuredEpisode) structuredEpisodeTmp).getConstraints());
 
@@ -273,8 +275,10 @@ public class ScenarioParser {
 					StructuredEpisode structuredEpisodeTmpConstraint = new StructuredEpisode();
 					structuredEpisodeTmpConstraint = (StructuredEpisode) extractExplicitConstraints(episode, structuredEpisodeTmpConstraint);
 					episode = structuredEpisodeTmpConstraint.getSentence();
+					/*
 					if(((StructuredEpisode) structuredEpisodeTmpConstraint).getConstraints() == null|| ((StructuredEpisode) structuredEpisodeTmpConstraint).getConstraints().isEmpty())
 						structuredEpisodeTmpConstraint = (StructuredEpisode) extractNonExplicitConstraints(episode, structuredEpisodeTmpConstraint);
+					*/
 					episode = ((StructuredEpisode) structuredEpisodeTmpConstraint).getSentence();
 					
 					//REMOVE PUNCTUATION AT THE END AND THE BEGIN OF THE SENTENCE
@@ -1299,7 +1303,7 @@ public class ScenarioParser {
 	
 	/**
 	 * Obtain an Structured Conditional Episode (StructuredEpisode) from Non-structured Episode description: 
-	 * <sentence> IF/WHEN <condition>
+	 * <sentence> (, IF | WHEN) <condition>
 	 * @param sentence
 	 * @return
 	 */

@@ -46,7 +46,7 @@ public final class Unambiguity {
 	public static final ArrayList<String> IMPLICIT_WORDS_PHRASES = 
 			new ArrayList<String>(Arrays.asList("anyone", "anybody", 
 					"anything", "everyone", "everybody", "everything"
-					, "he", "her", "hers", "herself", "him", "himself", 
+					, "he", "she", "her", "hers", "herself", "him", "himself", 
 					"his", "i", "it", "its", "itself", "me", "mine", "most", "my", "myself", "nobody", "none", "no one", "nothing", 
 					"our", "ours", "ourselves", "she", "someone", "somebody", "something",  "their", "theirs", 
 					"them", "themselves", "these", "they", "this", "those", "us", "we", "what", "whatever", "which",  

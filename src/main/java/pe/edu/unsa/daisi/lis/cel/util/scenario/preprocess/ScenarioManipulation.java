@@ -226,6 +226,32 @@ public class ScenarioManipulation {
 	}
 	
 	/**
+	 * A scenario references within its internal section/element another related scenario
+	 * @param scenario
+	 * @param element
+	 * @param relatedScenario
+	 * @return
+	 */
+	public static Boolean isSEquentiallyRelated(StructuredScenario scenario, String element, StructuredScenario relatedScenario) {
+		String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
+		Pattern patternTitle = Pattern.compile(regExpTitle);
+		String context = element.toUpperCase();
+		Matcher matcherTitle = patternTitle.matcher(context);
+		int startIndex = -1;
+		int endIndex = -1;
+		while(matcherTitle.find()) {
+			startIndex = matcherTitle.start();
+			endIndex = matcherTitle.end();
+			break;//firs occurrence
+		}
+		if (startIndex >= 0 && endIndex > 0) {
+			return true;
+		}			
+		return false;
+	}
+	
+	
+	/**
 	 * In order to identify non-explicit relationships between any two scenarios, we use the Proximity Index measure.
 	 * <br/>
 	 * Two or more scenarios are likely related when they share common portions in their descriptions, i.e., they involve the participation of common actors, they access shared resources or they are executed in the same context. They have the same importance. 

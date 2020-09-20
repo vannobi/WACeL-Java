@@ -149,6 +149,18 @@ public class ScenarioServiceImpl implements IScenarioService{
 				for(String preCondition : structuredScenario.getContext().getPreConditions()) {
 					for(StructuredScenario relatedScenario : sortedScenarios) {
 						if(preCondition.toUpperCase().contains(relatedScenario.getTitle().toUpperCase())) {
+							if (ScenarioManipulation.isSEquentiallyRelated(structuredScenario, preCondition, relatedScenario)) {
+								List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(PRE_CONDITION_RELATIONSHIP);
+								if(tmpScenarios == null)
+									tmpScenarios = new ArrayList<StructuredScenario>();  
+								if(!tmpScenarios.contains(relatedScenario))
+									tmpScenarios.add(relatedScenario);
+								seqRelatedScenarioHashMap.put(PRE_CONDITION_RELATIONSHIP, tmpScenarios);
+								
+								break;
+							}			
+							
+							/*
 							String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
 							Pattern patternTitle = Pattern.compile(regExpTitle);
 							String context = preCondition.toUpperCase();
@@ -170,7 +182,7 @@ public class ScenarioServiceImpl implements IScenarioService{
 								
 								break;
 							}							
-							
+							*/
 						}
 						
 					}
@@ -181,6 +193,17 @@ public class ScenarioServiceImpl implements IScenarioService{
 				for(String postCondition : structuredScenario.getContext().getPostConditions()) {
 					for(StructuredScenario relatedScenario : sortedScenarios) {
 						if(postCondition.toUpperCase().contains(relatedScenario.getTitle().toUpperCase())) {
+							if (ScenarioManipulation.isSEquentiallyRelated(structuredScenario, postCondition, relatedScenario)) {
+								List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(POST_CONDITION_RELATIONSHIP);
+								if(tmpScenarios == null)
+									tmpScenarios = new ArrayList<StructuredScenario>();  
+								if(!tmpScenarios.contains(relatedScenario))
+									tmpScenarios.add(relatedScenario);
+								seqRelatedScenarioHashMap.put(POST_CONDITION_RELATIONSHIP, tmpScenarios);
+								
+								break;
+							}		
+							/*
 							String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
 							Pattern patternTitle = Pattern.compile(regExpTitle);
 							String context = postCondition.toUpperCase();
@@ -200,7 +223,8 @@ public class ScenarioServiceImpl implements IScenarioService{
 									tmpScenarios.add(relatedScenario);
 								seqRelatedScenarioHashMap.put(POST_CONDITION_RELATIONSHIP, tmpScenarios);
 								break;
-							}							
+							}
+							*/							
 						}					
 					}
 				}
@@ -211,6 +235,17 @@ public class ScenarioServiceImpl implements IScenarioService{
 					String sentence = episode.getSentence().toUpperCase();//.toUpperCase();
 					for(StructuredScenario relatedScenario : sortedScenarios) {			
 						if(sentence.contains(relatedScenario.getTitle().toUpperCase())) {
+							if (ScenarioManipulation.isSEquentiallyRelated(structuredScenario, sentence, relatedScenario)) {
+								List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(SUB_SCENARIO_RELATIONSHIP);
+								if(tmpScenarios == null)
+									tmpScenarios = new ArrayList<StructuredScenario>();  
+								if(!tmpScenarios.contains(relatedScenario))
+									tmpScenarios.add(relatedScenario);
+								seqRelatedScenarioHashMap.put(SUB_SCENARIO_RELATIONSHIP, tmpScenarios);
+								
+								break;
+							}
+							/*
 							String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
 							Pattern patternTitle = Pattern.compile(regExpTitle);
 							Matcher matcherTitle = patternTitle.matcher(sentence);
@@ -229,7 +264,8 @@ public class ScenarioServiceImpl implements IScenarioService{
 									tmpScenarios.add(relatedScenario);
 								seqRelatedScenarioHashMap.put(SUB_SCENARIO_RELATIONSHIP, tmpScenarios);
 								break;
-							}							
+							}	
+							*/						
 						}						
 					}
 				}
@@ -241,6 +277,17 @@ public class ScenarioServiceImpl implements IScenarioService{
 						for(String solution : alternative.getSolution()) {
 							for(StructuredScenario relatedScenario : sortedScenarios) {
 								if(solution.toUpperCase().contains(relatedScenario.getTitle().toUpperCase())) {
+									if (ScenarioManipulation.isSEquentiallyRelated(structuredScenario, solution, relatedScenario)) {
+										List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(ALTERNATIVE_RELATIONSHIP);
+										if(tmpScenarios == null)
+											tmpScenarios = new ArrayList<StructuredScenario>();  
+										if(!tmpScenarios.contains(relatedScenario))
+											tmpScenarios.add(relatedScenario);
+										seqRelatedScenarioHashMap.put(ALTERNATIVE_RELATIONSHIP, tmpScenarios);
+										
+										break;
+									}
+									/*
 									String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
 									Pattern patternTitle = Pattern.compile(regExpTitle);
 									solution = solution.toUpperCase();
@@ -261,7 +308,7 @@ public class ScenarioServiceImpl implements IScenarioService{
 										seqRelatedScenarioHashMap.put(ALTERNATIVE_RELATIONSHIP, tmpScenarios);
 										break;
 									}			
-									
+									*/
 									
 								}
 							}							

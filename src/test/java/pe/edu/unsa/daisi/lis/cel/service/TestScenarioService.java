@@ -99,10 +99,11 @@ public class TestScenarioService {
 		scenario.setActors("Customer, Broker System");
 		scenario.setResources("Login page, Login information, Order");
 		scenario.setEpisodes(
-				"  3. system queries the database for news messages, whose expiry date and time have passed\r\n"+
-						"  2 System checks if a group with the given name has not been already defined and if so, inserts the name of a new group into a database\r\n"  
-						
+				"  1. system queries the database for news messages, whose expiry date and time have passed\r\n"+
+				"  2 System checks if a group with the given name has not been already defined and if so, inserts the name of a new group into a database\r\n"  +
+				"  3 If the user is already registered, the system automatically updates news messages from subscribed channels (refer to DOWNLOAD NEWS use case). If no, the system attempts to REGISTER A NEW USER (refer to Register a new user use case)\r\n"
 				);
+		
 		scenario.setAlternative("1.1 IF Customer is not registered THEN REGISTER CUSTOMER\r\n" + 
 				"  2.1. IF after 60 seconds THEN The Broker System displays a login timeout page\r\n" + 
 				"  4.1 IF the Customer login information is not accurate THEN The Broker System displays an alert message\r\n" + 

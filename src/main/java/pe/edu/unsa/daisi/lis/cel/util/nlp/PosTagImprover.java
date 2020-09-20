@@ -195,7 +195,7 @@ public final class PosTagImprover {
 							tokens = updatePosTagWithVerb(tokens, noun);
 							//tokens.get(allNouns.get(i).getIndex()).setConfirmedVerb(true);
 							//System.out.println("PTR2 Token: " + noun.getStem());
-							//System.out.println("PTR2 Token is Verb!");//FIxed in PTR13: System presents a registration data form/VBP and asks to enter the registration data
+							//System.out.println("PTR2 Token is Verb!");//FIxed in PTR14: System presents a registration data form/VBP and asks to enter the registration data
 						}						
 					}
 
@@ -238,6 +238,7 @@ public final class PosTagImprover {
 				}
 			}
 			
+			//FIX: User selects fields to be included in the report and rules to filter values from database"; //rules: VBZ?
 			//PTR4: Check that a 'Noun' is a 'Verb'. The 'Noun' position is the first or after a coordinating conjunction (CC)  
 			for(int i = 0; i < allNouns.size(); i++ ){
 				CustomToken noun = allNouns.get(i);
@@ -249,14 +250,40 @@ public final class PosTagImprover {
 					String prevPOSs =  getPosTagsAsString(tokens, 0, noun.getIndex());
 					//Next Tokens (contains POS tags:)
 					//String REGEX_NEXT_POS_TAGS = "^(IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|RB.?|TO).*";
-					String REGEX_NEXT_POS_TAGS = "^(IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|RB.?|TO|PRP.?).*";
+					//String REGEX_NEXT_POS_TAGS = "^((IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|RB.?|TO|PRP.?)).*";
+					String REGEX_NEXT_POS_TAGS = "^((IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|RB.?|PRP.?)).*";
 					//String REGEX_NEXT_POS_TAGS = "^(IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|((VB|VBP)\\s+NN.?)|RB.?|TO).*"; OpenNLP
 					String nextPOSs =  getPosTagsAsString(tokens, noun.getIndex()+1, tokens.size());
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS)) {
 						//THEN (Adjust Token)
 						tokens = updatePosTagWithVerb(tokens, noun);
-						//System.out.println("PTR4 Token: " + noun.getStem());
-						//System.out.println("PTR4 Token is Verb!");
+						System.out.println("PTR4 Token: " + noun.getStem());
+						System.out.println("PTR4 Token is Verb!");
+																		
+					}
+
+				}
+			}
+			
+			//PTR5: Check that a 'Noun' is a 'Verb'. The 'Noun' position is the first followed by a preposition or particle  
+			for(int i = 0; i < allNouns.size(); i++ ){
+				CustomToken noun = allNouns.get(i);
+				//GIVEN (Antecedent)
+				if(SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(noun.getStem()) && !tokens.get(allNouns.get(i).getIndex()).isConfirmedNoun()) {
+					//WHEN
+					//Previous Tokens (contains POS tags:)
+					String REGEX_PREV_POS_TAGS = "^";
+					String prevPOSs =  getPosTagsAsString(tokens, 0, noun.getIndex());
+					//Next Tokens (contains POS tags:)
+					//String REGEX_NEXT_POS_TAGS = "^(IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|RB.?|TO).*";
+					String REGEX_NEXT_POS_TAGS = "(IN|RP)?$";
+					//String REGEX_NEXT_POS_TAGS = "^(IN\\s+)?(NN.?|DT|PDT|JJ.?|VBD|VBN|((VB|VBP)\\s+NN.?)|RB.?|TO).*"; OpenNLP
+					String nextPOSs =  getPosTagsAsString(tokens, noun.getIndex()+1, tokens.size());
+					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS)) {
+						//THEN (Adjust Token)
+						tokens = updatePosTagWithVerb(tokens, noun);
+						//System.out.println("PTR5 Token: " + noun.getStem());
+						//System.out.println("PTR5 Token is Verb!");
 																		
 					}
 
@@ -274,7 +301,7 @@ public final class PosTagImprover {
 				}
 			}
 
-			//PTR5: Check that a 'Noun' between a Determiner (or Preposition or Noun or Adverb) and a 'TO' is effectively a 'Noun'
+			//PTR6: Check that a 'Noun' between a Determiner (or Preposition or Noun or Adverb) and a 'TO' is effectively a 'Noun'
 			for(int i = 0; i < allNouns.size(); i++ ){
 				CustomToken noun = allNouns.get(i);
 				//GIVEN (Antecedent)
@@ -283,18 +310,19 @@ public final class PosTagImprover {
 					//Previous Tokens (contains POS tags:)
 					//String REGEX_PREV_POS_TAGS = ".*(DT|IN|NN.?|RB)";
 					//String REGEX_PREV_POS_TAGS = ".*(((VB|VBP|VBZ)\\s+)(DT|IN|NN.?|RB)+)$";
-					String REGEX_PREV_POS_TAGS = ".*(((VB|VBP|VBZ)\\s+)(DT|PDT|IN|NN.?|RB)+)$";
+					String REGEX_PREV_POS_TAGS = ".*((VB|VBP|VBZ|VBD|VBN)(\\s+(DT|PDT|IN|NN.?|RB))+)$";
 					String prevPOSs =  getPosTagsAsString(tokens, 0, noun.getIndex());
+					prevPOSs = prevPOSs.trim();
 					//Next Tokens (contains POS tags:)
 					//String REGEX_NEXT_POS_TAGS = "^(TO\\s+(DT|IN|NN.?|PRP|JJ.?)).*";
 					String REGEX_NEXT_POS_TAGS = "^(TO\\s+(DT|PDT|IN|NN.?|PRP|JJ.?)).*";
 					String nextPOSs =  getPosTagsAsString(tokens, noun.getIndex()+1, tokens.size());
+					nextPOSs  = nextPOSs.trim();
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS)) {
 						//THEN (Adjust Token)
 						tokens.get(allNouns.get(i).getIndex()).setConfirmedNoun(true);
-						//System.out.println("PRT5 Token: " + noun.getStem());
-						//System.out.println("PTR5 Token is Confirmed Noun!");
-						
+						//System.out.println("PRT6 Token: " + noun.getStem());
+						//System.out.println("PTR6 Token is Confirmed Noun!");						
 					}												
 				}
 
@@ -311,7 +339,7 @@ public final class PosTagImprover {
 					
 				}
 			}
-			//PTR6:	Check that a 'Noun' followed by a gerund verb is effectively a 'Noun'
+			//PTR7:	Check that a 'Noun' followed by a gerund verb is effectively a 'Noun'
 			for(int i = 0; i < allNouns.size(); i++ ){
 				CustomToken noun = allNouns.get(i);
 				//GIVEN (Antecedent)
@@ -326,22 +354,22 @@ public final class PosTagImprover {
 					if(nextPOSs.matches(REGEX_NEXT_POS_TAGS)) {
 						//THEN (Adjust Token)
 						tokens.get(allNouns.get(i).getIndex()).setConfirmedNoun(true);
-						//System.out.println("PTR6 Token: " + noun.getStem());
-						//System.out.println("PTR6 Token is Confirmed Noun!");
+						//System.out.println("PTR7 Token: " + noun.getStem());
+						//System.out.println("PTR7 Token is Confirmed Noun!");
 					}												
 				}
 
 			}
 			
 			
-			//PTR7:	Check that a 'Noun' is effectively a 'Noun'. The 'Noun' is preceded by a Verb + Determiner + Noun or Adjective
+			//PTR8:	Check that a 'Noun' is effectively a 'Noun'. The 'Noun' is preceded by a Verb + Determiner + Noun or Adjective
 			for(int i = 0; i < allNouns.size(); i++ ){
 				CustomToken noun = allNouns.get(i);
 				//GIVEN (Antecedent)
 				if(SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(noun.getStem()) && !tokens.get(allNouns.get(i).getIndex()).isConfirmedNoun()) {
 					//WHEN
 					//Previous Tokens (contains POS tags:)
-					String REGEX_PREV_POS_TAGS = ".*((VB|VBZ|VBP)(\\s+(PDT|DT))?(\\s+(NN.?|JJ.?))*)$";
+					String REGEX_PREV_POS_TAGS = ".*((VB|VBZ|VBP|VBD|VBN)(\\s+(PDT|DT))?(\\s+(NN.?|JJ.?))*)$";
 					String prevPOSs =   getPosTagsAsString(tokens, 0, noun.getIndex());
 					//Next Tokens (contains POS tags:)
 					String REGEX_NEXT_POS_TAGS = "";
@@ -352,8 +380,8 @@ public final class PosTagImprover {
 							String singularNounPrev = tokens.get(allNouns.get(i).getIndex() - 1).getStem();
 							if(!SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(singularNounPrev)) {
 								tokens.get(allNouns.get(i).getIndex()).setConfirmedNoun(true); 
-								//System.out.println("PTR7 Token: " + noun.getStem());
-								//System.out.println("PTR7 Token is Confirmed Noun!");
+								//System.out.println("PTR8 Token: " + noun.getStem());
+								//System.out.println("PTR8 Token is Confirmed Noun!");
 							}	
 						} 
 					}												
@@ -361,7 +389,7 @@ public final class PosTagImprover {
 				
 			}
 			
-			//PTR8:	Check that a 'Noun' is a 'Verb'. The 'Noun' position is the last or before a coordinating conjunction (CC)
+			//PTR9:	Check that a 'Noun' is a 'Verb'. The 'Noun' position is the last or before a coordinating conjunction (CC)
 			for(int i = 0; i < allNouns.size(); i++ ){
 				CustomToken noun = allNouns.get(i);
 				//GIVEN (Antecedent)
@@ -380,8 +408,8 @@ public final class PosTagImprover {
 							if(!SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(singularNounPrev)) {
 								tokens = updatePosTagWithVerb(tokens, noun);
 								//tokens.get(allNouns.get(i).getIndex()).setConfirmedNoun(true); 
-								//System.out.println("PTR8 Token: " + noun.getStem()); //No funciona: User fills all required personal client data forms //Corregido en 10
-								//System.out.println("PTR8 Token is Verb!");
+								//System.out.println("PTR9 Token: " + noun.getStem()); //No funciona: User fills all required personal client data forms //Corregido en 10
+								//System.out.println("PTR9 Token is Verb!");
 							}	
 						} 
 					}												
@@ -425,7 +453,7 @@ public final class PosTagImprover {
 				}
 			}
 
-			//PTR9: Check that a 'Verb' is effectively a 'Verb'. Prepositions are most commonly followed by a 'Noun' phrase or 'Pronoun'   
+			//PTR10: Check that a 'Verb' is effectively a 'Verb'. Prepositions are most commonly followed by a 'Noun' phrase or 'Pronoun'   
 			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -441,8 +469,8 @@ public final class PosTagImprover {
 						//THEN (Adjust Token)
 						tokens.get(verb.getIndex()).setConfirmedNoun(true);
 						tokens = updatePosTagWithNoun(tokens, verb);
-						//System.out.println("PTR9 Token: " + verb.getStem());
-						//System.out.println("PTR9 Token is Confirmed Noun!");
+						//System.out.println("PTR10 Token: " + verb.getStem());
+						//System.out.println("PTR10 Token is Confirmed Noun!");
 											
 					}
 
@@ -450,7 +478,7 @@ public final class PosTagImprover {
 				}
 			}
 			
-			//PTR10: Check that a 'Verb' is effectively a 'Verb'. The 'Verb' position is after a token, which is not a coordinating conjunction (CC)    
+			//PTR11: Check that a 'Verb' is effectively a 'Verb'. The 'Verb' position is after a token, which is not a coordinating conjunction (CC)    
 			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -468,8 +496,8 @@ public final class PosTagImprover {
 						String singularNounPrev = tokens.get(allVerbs.get(i).getIndex()-1).getStem();
 						if (!SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(singularNounPrev) ){
 							tokens.get(allVerbs.get(i).getIndex()).setConfirmedVerb(true);
-							//System.out.println("PTR10 Token: " + verb.getStem());
-							//System.out.println("PTR10 Token is confirmed Verb!");//FIxed in PTR13: System presents a registration data form/VBP and asks to enter the registration data
+							//System.out.println("PTR11 Token: " + verb.getStem());
+							//System.out.println("PTR11 Token is confirmed Verb!");//FIxed in PTR14: System presents a registration data form/VBP and asks to enter the registration data
 						}						
 					}
 
@@ -477,7 +505,7 @@ public final class PosTagImprover {
 				}
 			}
 			
-			//PTR11: Check that a 'Verb' is effectively a 'Verb'. The 'Verb' is preceded by a Noun and followed by 'TO' + Verb    
+			//PTR12: Check that a 'Verb' is effectively a 'Verb'. The 'Verb' is preceded by a Noun and followed by 'TO' + Verb    
 			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -494,8 +522,8 @@ public final class PosTagImprover {
 						String singularVerbNext = tokens.get(allVerbs.get(i).getIndex()+2).getStem();
 						if (!SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(singularNounPrev) && SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(singularVerbNext)){
 							tokens.get(allVerbs.get(i).getIndex()).setConfirmedVerb(true);
-							//System.out.println("PTR1 Token: " + verb.getStem());
-							//System.out.println("PTR11 Token is confirmed Verb!");
+							//System.out.println("PTR12 Token: " + verb.getStem());
+							//System.out.println("PTR12 Token is confirmed Verb!");
 						}						
 					}
 
@@ -504,7 +532,7 @@ public final class PosTagImprover {
 			}
 			
 						
-			//PTR12: Check that a 'Verb' followed by "OF" or TO_BE or TO_HAVE is a 'Noun'  
+			//PTR13: Check that a 'Verb' followed by "OF" or TO_BE or TO_HAVE is a 'Noun'  
 			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -521,8 +549,8 @@ public final class PosTagImprover {
 						String nextWord = tokens.get(allVerbs.get(i).getIndex() + 1).getStem();
 						if (nextWord.equals(PREPOSITION_OF) || nextWord.equals(VERB_TO_BE) || nextWord.equals(VERB_TO_HAVE)){ 
 							tokens = updatePosTagWithNoun(tokens, verb);
-							//System.out.println("PTR12 Token: " + verb.getStem());
-							//System.out.println("PTR12 Token is Noun!");
+							//System.out.println("PTR13 Token: " + verb.getStem());
+							//System.out.println("PTR13 Token is Noun!");
 							/**
 							 * Exception
 							 * I don't approve of hunting animals for their fur.
@@ -538,7 +566,7 @@ public final class PosTagImprover {
 				}
 			}
 			
-			//PTR13: Check that a 'Verb' is a 'Noun'. The 'Verb' position is the last or before a coordinating conjunction (CC)  
+			//PTR14: Check that a 'Verb' is a 'Noun'. The 'Verb' position is the last or before a coordinating conjunction (CC)  
 			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -555,8 +583,8 @@ public final class PosTagImprover {
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS)) {
 						//THEN (Adjust Token)
 						tokens = updatePosTagWithNoun(tokens, verb);
-						//System.out.println("PTR13 Token: " + verb.getStem());
-						//System.out.println("PTR13 Token is Noun!");											
+						//System.out.println("PTR14 Token: " + verb.getStem());
+						//System.out.println("PTR14 Token is Noun!");											
 					}
 
 				}
@@ -609,7 +637,7 @@ public final class PosTagImprover {
 				}
 			}
 			
-			//PTR14: Check that a 'Preposition' is a 'Verb'. The 'Preposition' position is the first or after a coordinating conjunction (CC)  
+			//PTR15: Check that a 'Preposition' is a 'Verb'. The 'Preposition' position is the first or after a coordinating conjunction (CC)  
 			for(int i = 0; i < allPrepositions.size(); i++ ){
 				CustomToken preposition = allPrepositions.get(i);
 				//GIVEN (Antecedent)
@@ -624,15 +652,15 @@ public final class PosTagImprover {
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS)) {
 						//THEN (Adjust Token)
 						tokens = updatePosTagPrepositionWithVerb(tokens, preposition);
-						//System.out.println("PTR14 Token: " + preposition.getStem());
-						//System.out.println("PTR14 Token is Verb -Prep!");
+						//System.out.println("PTR15 Token: " + preposition.getStem());
+						//System.out.println("PTR15 Token is Verb -Prep!");
 											
 					}
 
 				}
 			}
 			
-			//PTR15: Check that a 'Preposition' is a 'Verb'. The 'Preposition' position is after a token, which is not a coordinating conjunction (CC)  
+			//PTR16: Check that a 'Preposition' is a 'Verb'. The 'Preposition' position is after a token, which is not a coordinating conjunction (CC)  
 			for(int i = 0; i < allPrepositions.size(); i++ ){
 				CustomToken preposition = allPrepositions.get(i);
 				//GIVEN (Antecedent)
@@ -648,8 +676,8 @@ public final class PosTagImprover {
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS) ) {
 						//THEN (Adjust Token)
 						tokens = updatePosTagPrepositionWithVerb(tokens, preposition);
-						//System.out.println("PTR15 Token: " + preposition.getStem());
-						//System.out.println("PTR15 Token is Verb -Prep!");
+						//System.out.println("PTR16 Token: " + preposition.getStem());
+						//System.out.println("PTR16 Token is Verb -Prep!");
 											
 					}
 
@@ -721,14 +749,14 @@ public final class PosTagImprover {
 					
 				}
 			}
-			//PTR17: Check that an 'Adjective' is a 'Verb'. Modifiers are most commonly followed by adjectives
+			//PTR18: Check that an 'Adjective' is a 'Verb'. Modifiers are most commonly followed by adjectives
   			for(int i = 0; i < allAdjectives.size(); i++ ){
 				CustomToken adjective = allAdjectives.get(i);
 				//GIVEN (Antecedent)
 				if(SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(adjective.getStem()) && !tokens.get(allAdjectives.get(i).getIndex()).isConfirmedAdjective()) {
 					//WHEN
 					//Previous Tokens (contains POS tags:)
-					String REGEX_PREV_POS_TAGS = ".*([^(VB.?)])$";
+					String REGEX_PREV_POS_TAGS = ".*(([^(VB.?)]|^))$";
 					String prevPOSs = getPosTagsAsString(tokens, 0, adjective.getIndex());
 					//Next Tokens (contains POS tags:)
 					//String REGEX_NEXT_POS_TAGS = "^(DT|PDT|IN|NN.?|PRP|JJ.?|RB.?|VBD).*"; 
@@ -737,14 +765,14 @@ public final class PosTagImprover {
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) && nextPOSs.matches(REGEX_NEXT_POS_TAGS) ) {
 						//THEN (Adjust Token)
 						tokens = updatePosTagPrepositionWithVerb(tokens, adjective);
-						//System.out.println("PTR17 Token: " + adjective.getStem());
-						//System.out.println("PTR17 Token is Verb -Adj!");											
+						//System.out.println("PTR18 Token: " + adjective.getStem());
+						//System.out.println("PTR18 Token is Verb -Adj!");											
 					}
 
 				}
 			}
   			
-  			//PTR18: Check that a 'Verb' is an 'Adjective'. Adjectives are made from regular and irregular verbs by adding the suffixes -ing and -ed. 
+  			//PTR19: Check that a 'Verb' is an 'Adjective'. Adjectives are made from regular and irregular verbs by adding the suffixes -ing and -ed. 
   			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -760,14 +788,14 @@ public final class PosTagImprover {
 						if(!tokens.get(allVerbs.get(i).getIndex() - 1).getPosTag().equals(PosTagEnum.IN.name()) && !verb.getPosTag().equals(PosTagEnum.VBG.name())) {
 							tokens.get(verb.getIndex()).setConfirmedAdjective(true);
 							tokens = updatePosTagVerbWithAdjective(tokens, verb);
-							//System.out.println("PTR18 Token: " + verb.getStem());
-							//System.out.println("PTR18 Token is Verb -Adj!");
+							//System.out.println("PTR19 Token: " + verb.getStem());
+							//System.out.println("PTR19 Token is Verb -Adj!");
 						}
 					}
 
 			}
 			
-  			//PTR19: Check that a 'Verb' with -ing and -ed is an 'Adjective'. The 'Adjective' is preceded by a Verb (+ Determiner + Noun or Adjective)
+  			//PTR20: Check that a 'Verb' with -ing and -ed is an 'Adjective'. The 'Adjective' is preceded by a Verb (+ Determiner + Noun or Adjective)
   			for(int i = 0; i < allVerbs.size(); i++ ){
 				CustomToken verb = allVerbs.get(i);
 				//GIVEN (Antecedent)
@@ -784,12 +812,12 @@ public final class PosTagImprover {
 						if((verb.getPosTag().matches("(VBD|VBN)") && tokens.get(allVerbs.get(i).getIndex() - 1).getStem().equals(VERB_TO_HAVE))
 								|| (verb.getPosTag().equals(PosTagEnum.VBG.name()) && tokens.get(allVerbs.get(i).getIndex() - 1).getStem().equals(VERB_TO_BE)) ) {
 							tokens.get(verb.getIndex()).setConfirmedVerb(true);
-							//System.out.println("PTR19 Token is confirmed Verb!");
+							//System.out.println("PTR20 Token is confirmed Verb!");
 						} else {
 							tokens.get(verb.getIndex()).setConfirmedAdjective(true);
 							tokens = updatePosTagVerbWithAdjective(tokens, verb);
-							//System.out.println("PTR19 Token: " + verb.getStem());
-							//System.out.println("PTR19 Token is Verb -Adj!");
+							//System.out.println("PTR20 Token: " + verb.getStem());
+							//System.out.println("PTR20 Token is Verb -Adj!");
 						}
 					}
 
@@ -1085,22 +1113,22 @@ public final class PosTagImprover {
 		//String text1 = "download system finishes";
 		//String text1 = "process bids";
 		
-		//PTR6
+		//PTR7
 		//String text1 = "System sends a registration request to the server";
 		//String text1 = "system returns to step 1";
 		//String text1 = "user proceeds to register";
 		
-		//PTR7
+		//PTR8
 		//String text1 = "Post containing";
 		
-		//PTR8
+		//PTR9
 		//String text1 = "user sends user accounts";
 		//String text1 = "User fills all required personal client data forms";
 		//String text1 = "System presents a registration data form and asks to enter the registration data";
 		
 		//String text1 = "Candidate fills the registration data form and submits the registration data form";
 		
-		//PTR9
+		//PTR10
 		//String text1 = "scenario finishes";
 		//String text1 = "the scenario finishes";
 		//String text1= "logged user ends";
@@ -1111,22 +1139,30 @@ public final class PosTagImprover {
 		//String text1 ="system displays set of possible criteria";
 		//String text1 ="Administrator chooses the browse Candidate's list option";
 		
-		//PTR9
+		//PTR10
 		//String text1 = "System displays a tree view of available groups and channels and marks it";
-		//String text1 = "system queries the database for news messages, whose expiry date and time have passed";
+		String text1 = "system queries the database for news messages, whose expiry date and time have passed";
 		
-		//PTR13
+		//PTR14
 		//String text1 = "User fills all required personal client data forms";
 		//String text1 = "System presents a registration data form and asks to enter the registration data";
 		
 		//String text1 = "user register or system delete the files";
 		
-		//PTR14
+		//PTR15
 		//String text1 = "post a group message";
 		//String text1 = "show alert message";
 		
-		//PTR15
-		String text1 = "user like it";
+		//PTR16
+		//String text1 = "user like it";
+		
+		//String text1 = "search";
+		
+		//String text1 = "User selects fields to be included in the report and rules to filter values from database"; //FIX: rules/VBZ?
+		
+		//String text1 = "System informs user about that fact";
+		
+		//String text1 = "User select a client for whom new contract will be added";
 				
 		tokens = nlpAnalyzer.getTokens(text1);
 		//Pos tags

@@ -38,6 +38,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 		List<Defect> defects = new ArrayList<Defect>();
 		//@Episode 1: Check Readability index (Coleman-Liau,  Flesch-Kincaid, Automated Readability Index - ARI) (WARNING) - Title;
 		//Indicator: The sentence is difficult-to-read
+		/*
 		if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 			Readability readability = new Readability(structuredScenario.getTitle());
 			if (readability.getMetric(MetricType.COLEMAN_LIAU) > 14 || readability.getMetric(MetricType.FLESCH_KINCAID) > 14 || readability.getMetric(MetricType.ARI) > 14 ) {
@@ -59,14 +60,15 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				defect.setFixRecomendation(DefectIndicatorEnum.READABILITY_DIFFICULT_INDICATOR.getFixRecomendation());
 				defects.add(defect)	;
 			}
-		}	
+		}
+		*/
 		//@Episode 2: Check the Vagueness of scenario Title, Goal (WARNING);
 		for (String indicator : Unambiguity.VAGUE_WORDS_PHRASES) {
 			String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
 			String replacement = "<mark>" + indicator + "</mark>"; 
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title contains vague words or phrases
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					Defect defect = new Defect(); 
@@ -74,7 +76,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.VAGUENESS_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.VAGUENESS_INDICATOR.getFixRecomendation());
@@ -84,7 +87,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			}	
 			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
 				//Indicator: The Goal contains vague words or phrases		
-				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal());
+				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
 				String newGoal = goal.replaceAll(regExpWord, replacement);
 				if (!newGoal.equals(goal)) {
 					Defect defect = new Defect(); 
@@ -92,7 +95,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.VAGUENESS_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.VAGUENESS_INDICATOR.getFixRecomendation());
@@ -113,14 +117,15 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String indicator = token.getWord();
 				String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
 				String replacement = "<mark>" + indicator + "</mark>"; 
-				String newTitle = structuredScenario.getTitle().replaceAll(regExpWord, replacement);
+				String newTitle = structuredScenario.getTitle().toLowerCase().replaceAll(regExpWord, replacement);
 				
 				Defect defect = new Defect(); 
 				defect.setQualityProperty(QualityPropertyEnum.SUBJECTIVENESS.getQualityProperty());
 				defect.setScenarioId(structuredScenario.getId());
 				defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 				defect.setIndicator(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+				//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+				defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 				defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 				defect.setFixRecomendation(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getFixRecomendation());
@@ -137,14 +142,15 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String indicator = token.getWord();
 				String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
 				String replacement = "<mark>" + indicator + "</mark>"; 
-				String newGoal = structuredScenario.getGoal().replaceAll(regExpWord, replacement);
+				String newGoal = structuredScenario.getGoal().toLowerCase().replaceAll(regExpWord, replacement);
 				
 				Defect defect = new Defect(); 
 				defect.setQualityProperty(QualityPropertyEnum.SUBJECTIVENESS.getQualityProperty());
 				defect.setScenarioId(structuredScenario.getId());
 				defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
 				defect.setIndicator(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+				//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+				defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
 				defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 				defect.setFixRecomendation(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getFixRecomendation());
@@ -160,7 +166,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			String replacement = "<mark>" + indicator + "</mark>"; 
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title contains words that express optionality	
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					Defect defect = new Defect(); 
@@ -168,7 +174,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getFixRecomendation());
@@ -178,7 +185,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			}	
 			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
 				//Indicator: The Goal contains words that express optionality	
-				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal());
+				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
 				String newGoal = goal.replaceAll(regExpWord, replacement);
 				if (!newGoal.equals(goal)) {
 					Defect defect = new Defect(); 
@@ -186,7 +193,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getFixRecomendation());
@@ -201,7 +209,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			String replacement = "<mark>" + indicator + "</mark>"; 
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title contains clauses that are apt to cause uncertainty
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					Defect defect = new Defect(); 
@@ -209,7 +217,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.WEAKNESS_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.WEAKNESS_INDICATOR.getFixRecomendation());
@@ -219,7 +228,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			}	
 			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
 				//Indicator: The Goal contains clauses that are apt to cause uncertainty			
-				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal());
+				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
 				String newGoal = goal.replaceAll(regExpWord, replacement);
 				if (!newGoal.equals(goal)) {
 					Defect defect = new Defect(); 
@@ -227,7 +236,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.WEAKNESS_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.WEAKNESS_INDICATOR.getFixRecomendation());
@@ -242,7 +252,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			String replacement = "<mark>" + indicator + "</mark>";
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title does not specify the subject or object by means of its specific name but uses pronoun or indirect reference			
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					Defect defect = new Defect(); 
@@ -250,25 +260,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
-					defects.add(defect)	;
-					break;
-				}	
-			}	
-			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
-				//Indicator: The Goal does not specify the subject or object by means of its specific name but uses pronoun or indirect reference			
-				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal());
-				String newGoal = goal.replaceAll(regExpWord, replacement);
-				if (!newGoal.equals(goal)) {
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
-					defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
@@ -276,8 +269,98 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					break;
 				}	
 			}
+			/*
+			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
+				//Indicator: The Goal does not specify the subject or object by means of its specific name but uses pronoun or indirect reference			
+				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
+				String newGoal = goal.replaceAll(regExpWord, replacement);
+				if (!newGoal.equals(goal)) {
+					Defect defect = new Defect(); 
+					defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
+					defect.setScenarioId(structuredScenario.getId());
+					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
+					defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
+					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
+					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+					defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
+					defects.add(defect)	;
+					break;
+				}	
+			}*/
 		}
-		//NLP POS tagging?
+		
+		
+		if(goalNlp != null) {
+			//Indicator: The Goal contains implicit subjects 
+			if(goalNlp.getSubjects() != null && !goalNlp.getSubjects().isEmpty()) {
+				List<String> strSubjects = goalNlp.getSubjectsAsStringList();
+				if(goalNlp.getModifierSubjects() != null && !goalNlp.getModifierSubjects().isEmpty())
+					strSubjects.addAll(goalNlp.getModifierSubjectsAsStringList());
+				
+				String sentence  = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
+				String newSentence = sentence;
+				List<String> strIndicators = new ArrayList<String>();
+				for(String subject : strSubjects) {
+					for (String indicator : Unambiguity.IMPLICIT_WORDS_PHRASES) {
+						if (subject.equals(indicator)) {
+							
+							strIndicators.add(subject);
+						}
+					}
+					
+				}
+										
+				if (!strIndicators.isEmpty()) {
+					Defect defect = new Defect(); 
+					defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
+					defect.setScenarioId(structuredScenario.getId());
+					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
+					defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
+					defect.setIndicator(defect.getIndicator().replace("<indicator>", strIndicators.toString()));
+					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+					defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
+					defects.add(defect)	;						
+				}	
+			}
+			
+			//Indicator: The Goal contains implicit objects 
+			if(goalNlp.getDirectObjects() != null && !goalNlp.getDirectObjects().isEmpty()) {
+				List<String> strObjects = goalNlp.getDirectObjectsAsStringList();
+				if(goalNlp.getIndirectObjects() != null && !goalNlp.getIndirectObjects().isEmpty())
+					strObjects.addAll(goalNlp.getIndirectObjectsAsStringList());
+				
+				String sentence  = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
+				String newSentence = sentence;
+				List<String> strIndicators = new ArrayList<String>();
+				for(String object : strObjects) {
+					for (String indicator : Unambiguity.IMPLICIT_WORDS_PHRASES) {
+						if (object.equals(indicator)) {
+							strIndicators.add(object);
+						}
+					}
+					
+				}
+										
+				if (!strIndicators.isEmpty()) {
+					Defect defect = new Defect(); 
+					defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
+					defect.setScenarioId(structuredScenario.getId());
+					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
+					defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
+					defect.setIndicator(defect.getIndicator().replace("<indicator>", strIndicators.toString()));
+					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+					defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
+					defects.add(defect)	;		
+				}	
+			}
+				
+		}
 		
 		//@Episode 7: Check the Quantifiability of scenario Title, Goal (INFO);
 		for (String indicator : Unambiguity.QUANTITY_WORDS_PHRASES) {
@@ -285,7 +368,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			String replacement = "<mark>" + indicator + "</mark>";
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title contains words that express quantification			
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					Defect defect = new Defect(); 
@@ -293,7 +376,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getFixRecomendation());
@@ -303,7 +387,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			}	
 			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
 				//Indicator: The Goal contains words that express quantification			
-				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal());
+				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
 				String newGoal = goal.replaceAll(regExpWord, replacement);
 				if (!newGoal.equals(goal)) {
 					Defect defect = new Defect(); 
@@ -311,7 +395,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getFixRecomendation());
@@ -327,7 +412,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			String replacement = "<mark>" + indicator + "</mark>";
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title has more than one action-verb or subject 			
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					Defect defect = new Defect(); 
@@ -335,7 +420,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_INDICATOR.getFixRecomendation());
@@ -354,7 +440,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			String replacement = "<mark>" + indicator + "</mark>";
 			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
 				//Indicator: The Title contains a Text after a dot, hyphen, semicolon or other punctuation mark			
-				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle());
+				String title = ScenarioCleaner.cleanSentence(structuredScenario.getTitle().toLowerCase());
 				String newTitle = title.replaceAll(regExpWord, replacement);
 				if (!newTitle.equals(title)) {
 					newTitle = structuredScenario.getTitle().replaceAll(indicator, replacement);
@@ -363,7 +449,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getFixRecomendation());
@@ -373,7 +460,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			}	
 			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
 				//Indicator: The Goal contains a Text after a dot, hyphen, semicolon or other punctuation mark	
-				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal());
+				String goal = ScenarioCleaner.cleanSentence(structuredScenario.getGoal().toLowerCase());
 				String newGoal = goal.replaceAll(regExpWord, replacement);
 				if (!newGoal.equals(goal)) {
 					Defect defect = new Defect(); 
@@ -381,7 +468,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getGoal()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getFixRecomendation());
@@ -410,7 +498,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String replacement = "<mark>" + indicator + "</mark>";
 				if (episode.getSentence() != null && !episode.getSentence().isEmpty()) {
 					//Indicator: The Episode Sentence contains vague words or phrases
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
 					String newSentence = sentence.replaceAll(regExpWord, replacement);
 					if (!newSentence.equals(sentence)) {
 						Defect defect = new Defect(); 
@@ -419,7 +507,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.VAGUENESS_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.VAGUENESS_INDICATOR.getFixRecomendation());
@@ -442,7 +531,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						String indicator = token.getWord();
 						String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
 						String replacement = "<mark>" + indicator + "</mark>"; 
-						String newSentence = episode.getSentence().replaceAll(regExpWord, replacement);
+						String newSentence = episode.getSentence().toLowerCase().replaceAll(regExpWord, replacement);
 
 						Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.SUBJECTIVENESS.getQualityProperty());
@@ -450,7 +539,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getFixRecomendation());
@@ -467,7 +557,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String replacement = "<mark>" + indicator + "</mark>";
 				if (episode.getSentence() != null && !episode.getSentence().isEmpty()) {
 					//Indicator: The Episode sentence contains words that express optionality	
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
 					String newSentence = sentence.replaceAll(regExpWord, replacement);
 					if (!newSentence.equals(sentence)) {
 						Defect defect = new Defect(); 
@@ -476,7 +566,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getFixRecomendation());
@@ -492,7 +583,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String replacement = "<mark>" + indicator + "</mark>";
 				if (episode.getSentence() != null && !episode.getSentence().isEmpty()) {
 					//Indicator: The Episode sentence contains clauses that are apt to cause uncertainty
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
 					String newSentence = sentence.replaceAll(regExpWord, replacement);
 					if (!newSentence.equals(sentence)) {
 						Defect defect = new Defect(); 
@@ -501,7 +592,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.WEAKNESS_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.WEAKNESS_INDICATOR.getFixRecomendation());
@@ -520,30 +612,29 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					List<String> strSubjects = sentenceComponentsImplicit.getSubjectsAsStringList();
 					if(sentenceComponentsImplicit.getModifierSubjects() != null && !sentenceComponentsImplicit.getModifierSubjects().isEmpty())
 						strSubjects.addAll(sentenceComponentsImplicit.getModifierSubjectsAsStringList());
-					
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
-					String newSentence = episode.getSentence();
+					if(sentenceComponentsImplicit.getComplementSubjects() != null && !sentenceComponentsImplicit.getComplementSubjects().isEmpty())
+						strSubjects.addAll(sentenceComponentsImplicit.getComplementSubjectsAsStringList());
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
+					String newSentence = sentence;
 					List<String> strIndicators = new ArrayList<String>();
 					for(String subject : strSubjects) {
 						for (String indicator : Unambiguity.IMPLICIT_WORDS_PHRASES) {
 							if (subject.equals(indicator)) {
-								String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + subject + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-								String replacement = "<mark>" + subject + "</mark>";
-								newSentence = newSentence.replaceAll(regExpWord, replacement);
 								strIndicators.add(subject);
 							}
 						}
 						
 					}
 											
-					if (!newSentence.equals(sentence)) {
+					if (!strIndicators.isEmpty()) {
 						Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
 						defect.setScenarioId(structuredScenario.getId());
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", strIndicators.toString()));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
@@ -558,29 +649,27 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					if(sentenceComponentsImplicit.getIndirectObjects() != null && !sentenceComponentsImplicit.getIndirectObjects().isEmpty())
 						strObjects.addAll(sentenceComponentsImplicit.getIndirectObjectsAsStringList());
 					
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
-					String newSentence = episode.getSentence();
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
+					String newSentence = sentence;
 					List<String> strIndicators = new ArrayList<String>();
 					for(String object : strObjects) {
 						for (String indicator : Unambiguity.IMPLICIT_WORDS_PHRASES) {
 							if (object.equals(indicator)) {
-								String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + object + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-								String replacement = "<mark>" + object + "</mark>";
-								newSentence = newSentence.replaceAll(regExpWord, replacement);
 								strIndicators.add(object);
 							}
 						}
 						
 					}
 											
-					if (!newSentence.equals(sentence)) {
+					if (!strIndicators.isEmpty()) {
 						Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
 						defect.setScenarioId(structuredScenario.getId());
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", strIndicators.toString()));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
@@ -625,7 +714,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String replacement = "<mark>" + indicator + "</mark>";
 				if (episode.getSentence() != null && !episode.getSentence().isEmpty()) {
 					//Indicator: The Episode sentence contains words that express quantification
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
 					String newSentence = sentence.replaceAll(regExpWord, replacement);
 					if (!newSentence.equals(sentence)) {
 						Defect defect = new Defect(); 
@@ -634,7 +723,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 						defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getFixRecomendation());
@@ -652,7 +742,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 
 				//Indicator: The Episode sentence has more than one subject 
 				if(sentenceComponentsMultiple.getSubjects() != null && !sentenceComponentsMultiple.getSubjects().isEmpty() && sentenceComponentsMultiple.getSubjects().size() > 1) {
-					String newSentence = episode.getSentence();
+					String newSentence = episode.getSentence().toLowerCase();
 					for(String indicator : sentenceComponentsMultiple.getSubjectsAsStringList()) {
 						String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
 						String replacement = "<mark>" + indicator + "</mark>";
@@ -665,7 +755,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 					defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 					defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_SUBJECT_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponentsMultiple.getSubjectsAsString()));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_SUBJECT_INDICATOR.getFixRecomendation());
@@ -674,7 +765,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 
 				//Indicator: The Episode sentence has more than one main action-verb
 				if(sentenceComponentsMultiple.getMainActionVerbs() != null && !sentenceComponentsMultiple.getMainActionVerbs().isEmpty() && sentenceComponentsMultiple.getMainActionVerbs().entrySet().size() > 1) {
-					String newSentence = episode.getSentence();
+					String newSentence = episode.getSentence().toLowerCase();
 					for(String indicator : sentenceComponentsMultiple.getMainActionVerbsAsStringList()) {
 						String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
 						String replacement = "<mark>" + indicator + "</mark>";
@@ -687,7 +778,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 					defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 					defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_ACTION_VERB_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+					//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+					defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 					defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponentsMultiple.getMainActionVerbsAsString()));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_ACTION_VERB_INDICATOR.getFixRecomendation());
@@ -702,7 +794,7 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 				String replacement = "<mark>" + indicator + "</mark>";
 				if (episode.getSentence() != null && !episode.getSentence().isEmpty()) {
 					//Indicator: The Episode sentence contains a Text after a dot, hyphen, semicolon or other punctuation mark
-					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence());
+					String sentence  = ScenarioCleaner.cleanSentence(episode.getSentence().toLowerCase());
 					String newSentence = sentence.replaceAll(regExpWord, replacement);
 					if (!newSentence.equals(sentence)) {
 						newSentence = episode.getSentence().replaceAll(indicator, replacement);
@@ -712,7 +804,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
 						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getFixRecomendation());
@@ -745,16 +838,17 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					for(String solution : alternative.getSolution()) {
 						if(solution != null && !solution.isEmpty()) {
 							//Indicator: The Alternative solution step contains vague words or phrases
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution.replaceAll(regExpWord, replacement);
-							if (!newSentence.equals(solution)) {
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution.replaceAll(regExpWord, replacement);
+							if (!newSentence.equals(lowSolution)) {
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.VAGUENESS.getQualityProperty());
 								defect.setScenarioId(structuredScenario.getId());
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.VAGUENESS_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.VAGUENESS_INDICATOR.getFixRecomendation());
@@ -783,7 +877,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 								String indicator = token.getWord();
 								String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
 								String replacement = "<mark>" + indicator + "</mark>"; 
-								String newSentence = solution.replaceAll(regExpWord, replacement);
+								String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+								String newSentence = lowSolution.replaceAll(regExpWord, replacement);
 		
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.SUBJECTIVENESS.getQualityProperty());
@@ -791,7 +886,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.SUBJECTIVENESS_INDICATOR.getFixRecomendation());
@@ -811,16 +907,17 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					for(String solution : alternative.getSolution()) {
 						if(solution != null && !solution.isEmpty()) {
 							//Indicator: The Alternative solution step contains words that express optionality	
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution.replaceAll(regExpWord, replacement);
-							if (!newSentence.equals(solution)) {
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution.replaceAll(regExpWord, replacement);
+							if (!newSentence.equals(lowSolution)) {
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.OPTIONALITY.getQualityProperty());
 								defect.setScenarioId(structuredScenario.getId());
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.OPTIONALITY_INDICATOR.getFixRecomendation());
@@ -840,16 +937,17 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					for(String solution : alternative.getSolution()) {
 						if(solution != null && !solution.isEmpty()) {
 							//Indicator: The Alternative solution step contains clauses that are apt to cause uncertainty
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution.replaceAll(regExpWord, replacement);
-							if (!newSentence.equals(solution)) {
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution.replaceAll(regExpWord, replacement);
+							if (!newSentence.equals(lowSolution)) {
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.WEAKNESS.getQualityProperty());
 								defect.setScenarioId(structuredScenario.getId());
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.WEAKNESS_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.WEAKNESS_INDICATOR.getFixRecomendation());
@@ -873,29 +971,28 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 							if(sentenceComponentsImplicit.getModifierSubjects() != null && !sentenceComponentsImplicit.getModifierSubjects().isEmpty())
 								strSubjects.addAll(sentenceComponentsImplicit.getModifierSubjectsAsStringList());
 							
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution;
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution;
 							List<String> strIndicators = new ArrayList<String>();
 							for(String subject : strSubjects) {
 								for (String indicator : Unambiguity.IMPLICIT_WORDS_PHRASES) {
 									if (subject.equals(indicator)) {
-										String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + subject + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-										String replacement = "<mark>" + subject + "</mark>";
-										newSentence = newSentence.replaceAll(regExpWord, replacement);
+										
 										strIndicators.add(subject);
 									}
 								}
 								
 							}
 													
-							if (!newSentence.equals(solution)) {
+							if (!strIndicators.isEmpty()) {
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
 								defect.setScenarioId(structuredScenario.getId());
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", strIndicators.toString()));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
@@ -910,29 +1007,27 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 							if(sentenceComponentsImplicit.getIndirectObjects() != null && !sentenceComponentsImplicit.getIndirectObjects().isEmpty())
 								strObjects.addAll(sentenceComponentsImplicit.getIndirectObjectsAsStringList());
 							
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution;
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution;
 							List<String> strIndicators = new ArrayList<String>();
 							for(String object : strObjects) {
 								for (String indicator : Unambiguity.IMPLICIT_WORDS_PHRASES) {
 									if (object.equals(indicator)) {
-										String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + object + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-										String replacement = "<mark>" + object + "</mark>";
-										newSentence = newSentence.replaceAll(regExpWord, replacement);
 										strIndicators.add(object);
 									}
 								}
 								
 							}
 													
-							if (!newSentence.equals(solution)) {
+							if (!strIndicators.isEmpty()) {
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.IMPLICITY.getQualityProperty());
 								defect.setScenarioId(structuredScenario.getId());
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.IMPLICITY_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", strIndicators.toString()));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.IMPLICITY_INDICATOR.getFixRecomendation());
@@ -986,16 +1081,17 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					for(String solution : alternative.getSolution()) {
 						if(solution != null && !solution.isEmpty()) {
 							//Indicator: The Alternative solution step contains words that express quantification
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution.replaceAll(regExpWord, replacement);
-							if (!newSentence.equals(solution)) {
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution.replaceAll(regExpWord, replacement);
+							if (!newSentence.equals(lowSolution)) {
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.QUANTIFIABILITY.getQualityProperty());
 								defect.setScenarioId(structuredScenario.getId());
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 								defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.QUANTIFIABILITY_INDICATOR.getFixRecomendation());
@@ -1009,82 +1105,66 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 			}
 
 			//@Episode 10.8: Check the Multiplicity of scenario Alternative (WARNING);
-			boolean isMultiple = false;
-			for (String indicator : Unambiguity.MULTIPLE_WORDS_PHRASES) {
-				String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-				String replacement = "<mark>" + indicator + "</mark>";
-				if (alternative.getSolution() != null && !alternative.getSolution().isEmpty()) {
-					for(String solution : alternative.getSolution()) {
-						if(solution != null && !solution.isEmpty()) {
-							String newSentence = solution.replaceAll(regExpWord, replacement);
-							if (!newSentence.equals(solution)) {
-								isMultiple = true;
-								break;
-							}
-						}
-					}
-				}	
-				
-			}
+			
 			
 			//NLP Dependency parsing
-			if(isMultiple) {
-				for (int i = 0; i < alternative.getSolution().size(); i++) {
-					String solution = alternative.getSolution().get(i);
-					if(solution != null && !solution.isEmpty()) {
-						CustomSentenceNlpInfo sentenceComponents = alternative.getSolutionNlp().get(i);
-						if(sentenceComponents != null) {
-							
-							//More that one sentences
-												
-							//Indicator: The Alternative solution step has more than one subject
-							if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty() && sentenceComponents.getSubjects().size() > 1) {
-								String newSentence = solution;
-								for(String indicator : sentenceComponents.getSubjectsAsStringList()) {
-									String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-									String replacement = "<mark>" + indicator + "</mark>";
-									newSentence = newSentence.replaceAll(regExpWord, replacement);
-								}
-														
-								Defect defect = new Defect(); 
-								defect.setQualityProperty(QualityPropertyEnum.MULTIPLICITY.getQualityProperty());
-								defect.setScenarioId(structuredScenario.getId());
-								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-								defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_SUBJECT_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
-								defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getSubjectsAsString()));
-								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-								defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_SUBJECT_INDICATOR.getFixRecomendation());
-								defects.add(defect)	;						
+			for (int i = 0; i < alternative.getSolution().size(); i++) {
+				String solution = alternative.getSolution().get(i);
+				if(solution != null && !solution.isEmpty()) {
+					CustomSentenceNlpInfo sentenceComponents = alternative.getSolutionNlp().get(i);
+					if(sentenceComponents != null) {
+
+						//More that one sentences
+
+						//Indicator: The Alternative solution step has more than one subject
+						if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty() && sentenceComponents.getSubjects().size() > 1) {
+							String newSentence = solution.toLowerCase();
+							for(String indicator : sentenceComponents.getSubjectsAsStringList()) {
+								String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
+								String replacement = "<mark>" + indicator + "</mark>";
+								newSentence = newSentence.replaceAll(regExpWord, replacement);
 							}
-							
-							//Indicator: The Alternative solution step has more than one main action-verb
-							if(sentenceComponents.getMainActionVerbs() != null && !sentenceComponents.getMainActionVerbs().isEmpty() && sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
-								String newSentence = solution;
-								for(String indicator : sentenceComponents.getMainActionVerbsAsStringList()) {
-									String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-									String replacement = "<mark>" + indicator + "</mark>";
-									newSentence = newSentence.replaceAll(regExpWord, replacement);
-								}
-														
-								Defect defect = new Defect(); 
-								defect.setQualityProperty(QualityPropertyEnum.MULTIPLICITY.getQualityProperty());
-								defect.setScenarioId(structuredScenario.getId());
-								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-								defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_ACTION_VERB_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
-								defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
-								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-								defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_ACTION_VERB_INDICATOR.getFixRecomendation());
-								defects.add(defect)	;
-							}					
+
+							Defect defect = new Defect(); 
+							defect.setQualityProperty(QualityPropertyEnum.MULTIPLICITY.getQualityProperty());
+							defect.setScenarioId(structuredScenario.getId());
+							defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
+							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
+							defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_SUBJECT_INDICATOR.getDefectIndicator());
+							//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+							defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
+							defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getSubjectsAsString()));
+							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+							defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_SUBJECT_INDICATOR.getFixRecomendation());
+							defects.add(defect)	;						
 						}
+
+						//Indicator: The Alternative solution step has more than one main action-verb
+						if(sentenceComponents.getMainActionVerbs() != null && !sentenceComponents.getMainActionVerbs().isEmpty() && sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
+							String newSentence = solution.toLowerCase();
+							for(String indicator : sentenceComponents.getMainActionVerbsAsStringList()) {
+								String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
+								String replacement = "<mark>" + indicator + "</mark>";
+								newSentence = newSentence.replaceAll(regExpWord, replacement);
+							}
+
+							Defect defect = new Defect(); 
+							defect.setQualityProperty(QualityPropertyEnum.MULTIPLICITY.getQualityProperty());
+							defect.setScenarioId(structuredScenario.getId());
+							defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
+							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
+							defect.setIndicator(DefectIndicatorEnum.MULTIPLICITY_ACTION_VERB_INDICATOR.getDefectIndicator());
+							//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+							defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
+							defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+							defect.setFixRecomendation(DefectIndicatorEnum.MULTIPLICITY_ACTION_VERB_INDICATOR.getFixRecomendation());
+							defects.add(defect)	;
+						}					
 					}
 				}
-			
 			}
+			
 			
 			
 			//@Episode 10.9: Check the Minimality of scenario Alternative (WARNING);
@@ -1095,9 +1175,9 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 					for(String solution : alternative.getSolution()) {
 						if(solution != null && !solution.isEmpty()) {
 							//Indicator: The Alternative solution step contains a Text after a dot, hyphen, semicolon or other punctuation mark
-							solution  = ScenarioCleaner.cleanSentence(solution);
-							String newSentence = solution.replaceAll(regExpWord, replacement);
-							if (!newSentence.equals(solution)) {
+							String lowSolution  = ScenarioCleaner.cleanSentence(solution.toLowerCase());
+							String newSentence = lowSolution.replaceAll(regExpWord, replacement);
+							if (!newSentence.equals(lowSolution)) {
 								newSentence = solution.replaceAll(indicator, replacement);
 								Defect defect = new Defect(); 
 								defect.setQualityProperty(QualityPropertyEnum.MINIMALITY.getQualityProperty());
@@ -1105,7 +1185,8 @@ public class UnambiguityAnalysisServiceImpl implements IUnambiguityAnalysisServi
 								defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
 								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 								defect.setIndicator(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								//defect.setIndicator(defect.getIndicator().replace("<sentence>", newSentence));
+								defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
 								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
 								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.NON_MINIMALITY_INDICATOR.getFixRecomendation());

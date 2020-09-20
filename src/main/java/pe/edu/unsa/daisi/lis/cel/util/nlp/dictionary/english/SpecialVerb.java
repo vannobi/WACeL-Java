@@ -21,14 +21,6 @@ public final class SpecialVerb {
 												"appears", "am", "is", "are", "believes", "belongs", "considers", "consists", "contains", "costs", "doubts", "exists", "fits", "hates", "hears", "has", "knows", "likes", "loves", "matters", "means", "needs", "owes", "owns", "prefers", "remembers", "resembles", "seems", "supposes", "suspects", "understands", "wants", "wishes",
 												"appeared", "was", "were", "believed", "belonged", "considered", "consisted", "contained", "existed", "fitted", "hated", "heard", "had", "knew", "liked", "loved", "mattered", "meant", "needed", "owed", "prefered", "remembered", "resembled", "seemed", "supposed", "suspected", "understood", "wanted", "wished", "known", "liked", "loved", "mattered", "already", "ready"));
 
-	public static final ArrayList<String> NOUNS_AND_VERBS = 
-			new ArrayList<String>(Arrays.asList("load", "register", "choose", "change", "print", "proceed", "highlight", "browse","query", "import", "export", 
-					"configure", "back", "check","generate","finish","link","step", "search","contact","validate","approve",
-					"download", "store", "delete","use","activate","like","form","transfer","view","grant","put(","","broadcast","order","process","bid",
-					"prompt","update","access", "account", "release", "compute", "login", "inform",
-					"welcome", "filter", "sort", "view", "log", "releas", "balance", "insert", "deposit", "select", "type", "list", "retrieve", 
-					"balance", "signal", "delete", "press", "enter", "show"));
-	
 	
 	public static final HashMap<String, Boolean> VALIDATION_VERBS_HASH;
 	static {
@@ -572,6 +564,10 @@ public final class SpecialVerb {
 		
 		//OpenNLP Lemmatizer
 		NOUNS_AND_VERBS_HASH.put("divide", true);
+		NOUNS_AND_VERBS_HASH.put("date", true);
+		
+		//Special Verb/Adjective
+		NOUNS_AND_VERBS_HASH.put("unsubscribe", true);
 	}
 }
 

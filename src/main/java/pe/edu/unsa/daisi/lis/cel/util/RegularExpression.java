@@ -21,8 +21,8 @@ public final class RegularExpression {
 	public static final String REGEX_START_DELIMITING_CONDITIONAL_EPISODE_ACTION = "([\\,\\;]?\\s+([tT][hH][eE][nN]|[eE][nN][tT][aA]?[„√]?[oO]|[eE][nN][tT][oO][nN][cC][eE][sS]?)|[\\,\\;])(\\n|\\r|$|\\s+)"; //Ex. IF ... THEN .... IF ..., ....
 	
 	//TBD: Non explict conditional episodes/exceptions (<sentence> IF | WHEN) - Ex. User adds a new item when system is online
-	public static final String REGEX_START_DELIMITING_CONDITIONAL_EPISODE_NON_EXPLICIT_CONDITIONS = "[\\,\\;]?\\s+([iI][fF]|[wW][hH][eE][tT][hH][eE][rR]|[wW][hH][eN][nN]|[sS][eE]|[sS][iI]|[cCqQ][uU][aA][nN][dD][oO])\\s+"; //Ex. <sentence> IF | WHEN ....
-	
+	//public static final String REGEX_START_DELIMITING_CONDITIONAL_EPISODE_NON_EXPLICIT_CONDITIONS = "[\\,\\;]?\\s+([iI][fF]|[wW][hH][eE][tT][hH][eE][rR]|[wW][hH][eN][nN]|[sS][eE]|[sS][iI]|[cCqQ][uU][aA][nN][dD][oO])\\s+"; 
+	public static final String REGEX_START_DELIMITING_CONDITIONAL_EPISODE_NON_EXPLICIT_CONDITIONS = "([\\,\\;]\\s+)?([\\,\\;]\\s*([iI][fF]|[sS][eE]|[sS][iI]|[wW][hH][eE][tT][hH][eE][rR])|([wW][hH][eN][nN]|[cCqQ][uU][aA][nN][dD][oO]))\\s+"; //Ex. <sentence> IF | WHEN ....
 	//COCKBURN: VALIDATION ACTION -> "Verifies" / 	"validates" / "ensures" / "establishes" are good, goal-achieving action verbs.
 	//Therefore, avoid the verbs "checks" and "sees whether". Use instead one of the other goal achieving action verbs for a validation step. Let the presence of the word "if" trigger your 	thinking.
 	public static final String REG_EX_VALIDATION_ACTION_INDICATOR =             "(verif[yi][e]?[s]?|validate[s]?|ensure[s]?|establish[e]?[s]?|check[s]?|see[s]?|verifica|valida|v[eÈÍ])\\s+([tTwW][hH][aA][tT]|[qq][uU][eÈÍE… ])\\s+";

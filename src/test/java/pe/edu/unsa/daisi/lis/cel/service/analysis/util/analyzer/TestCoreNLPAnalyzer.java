@@ -2,15 +2,22 @@ package pe.edu.unsa.daisi.lis.cel.service.analysis.util.analyzer;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import pe.edu.unsa.daisi.lis.cel.util.RegularExpression;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CoreNLPAnalyzer;
+import pe.edu.unsa.daisi.lis.cel.util.nlp.CustomSentenceNlpInfo;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CustomToken;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.INLPAnalyzer;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.OpenNLPAnalyzer;
+import pe.edu.unsa.daisi.lis.cel.util.nlp.dictionary.english.Unambiguity;
+import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioCleaner;
 
 public class TestCoreNLPAnalyzer {
 
@@ -602,7 +609,7 @@ public class TestCoreNLPAnalyzer {
 		    	System.out.println(getWordsAsString(tokens));
 		    	//Pos tags
 		    	System.out.println(getPosTagsAsString(tokens));
-		    	assertEquals("[JJ, NN, NNS]", getPosTagsAsString(tokens));//UNSUBSCRIBE JJ ????
+		    	assertEquals("[VB, NN, NNS]", getPosTagsAsString(tokens));//UNSUBSCRIBE JJ ????
 		    	
 				String text71 = "use case ends"; 
 				tokens = nlpAnalyzer.getTokens(text71);
@@ -642,7 +649,7 @@ public class TestCoreNLPAnalyzer {
 		    	System.out.println(getWordsAsString(tokens));
 		    	//Pos tags
 		    	System.out.println(getPosTagsAsString(tokens));
-		    	assertEquals("[NN, VBZ, DT, NN, NNS, NN, CC, VBZ, DT, NN, NNS, NN]", getPosTagsAsString(tokens)); //Error CoreNLP data/NNS  ???
+		    	assertEquals("[NN, VBZ, DT, NN, NNS, NN, CC, VBZ, DT, NN, NNS, NN]", getPosTagsAsString(tokens)); //data/NNS  ???
 		    	
 		    	String text76 = "Check application status";
 		    	tokens = nlpAnalyzer.getTokens(text76);
@@ -685,7 +692,7 @@ public class TestCoreNLPAnalyzer {
 		    	System.out.println(getPosTagsAsString(tokens));
 		    	assertEquals("[VB, IN, NN]", getPosTagsAsString(tokens));
 		    			
-		    
+		    	
 		    	String text81= "log  to the system";
 		    	tokens = nlpAnalyzer.getTokens(text81);
 				//Tokens - words
@@ -716,7 +723,7 @@ public class TestCoreNLPAnalyzer {
 		    	System.out.println(getWordsAsString(tokens));
 		    	//Pos tags
 		    	System.out.println(getPosTagsAsString(tokens));
-		    	assertEquals("[NN]", getPosTagsAsString(tokens)); //FIX PTR4
+		    	assertEquals("[VB]", getPosTagsAsString(tokens)); //FIX PTR4
 		    	
 		    	String text85 = "Administrator types the name of the channel and the URL of the news service and selects Add channel";
 		    	tokens = nlpAnalyzer.getTokens(text85);
@@ -768,6 +775,32 @@ public class TestCoreNLPAnalyzer {
 		    	assertEquals("[NN, VBP, IN, TO, NN]", getPosTagsAsString(tokens));
 		    	
 		    	
+		    	String text91 = "User proceeds to print";
+				tokens = nlpAnalyzer.getTokens(text91);
+				//Tokens - words
+		    	System.out.println(getWordsAsString(tokens));
+		    	//Pos tags
+		    	System.out.println(getPosTagsAsString(tokens));
+		    	assertEquals("[NN, VBZ, TO, VB]", getPosTagsAsString(tokens));
+		    	
+		    	String text92 = "User proceeds to print";
+				tokens = nlpAnalyzer.getTokens(text92);
+				//Tokens - words
+		    	System.out.println(getWordsAsString(tokens));
+		    	//Pos tags
+		    	System.out.println(getPosTagsAsString(tokens));
+		    	assertEquals("[NN, VBZ, TO, VB]", getPosTagsAsString(tokens));
+		    	
+		    	
+		    	String text93 = "System assigns an expiry date and time to each incoming message";
+		    	tokens = nlpAnalyzer.getTokens(text93);
+				//Tokens - words
+		    	System.out.println(getWordsAsString(tokens));
+		    	//Pos tags
+		    	System.out.println(getPosTagsAsString(tokens));
+		    	assertEquals("[NN, VBZ, DT, NN, NN, CC, NN, TO, DT, JJ, NN]", getPosTagsAsString(tokens)); //FIX Rule PTR4: time/VBP  ????
+		    			    	
+		    	
 		    	/*
 		    	String text83 = "user Log in to the system";
 		    	tokens = nlpAnalyzer.getTokens(text83);
@@ -815,5 +848,230 @@ public class TestCoreNLPAnalyzer {
 	public void testGetSentenceComponentsWithSuccess( ) {
 		
 	}
+	
+    public static void main(String[] args) {
+		//System.out.println(isPlural("exercices"));
+		//System.out.println(isPlural("shoe"));
+		
+		//System.out.println(getVerbBaseFromThirdPerson("gets"));
+		
+		
+		INLPAnalyzer nlpAnalyzer = CoreNLPAnalyzer.getInstance();//singleton
+		
+		
+		
+		//String text1 ="System sends the server a  registration request";
+		//String text1 = "broker system carry out  customer's information to suppliers";
+		//String text1 = "User fills all required personal client data forms";
+		//String text1 ="User creates filter for searching";
+		//String text1 ="System sends a registration request to the server";
+		
+		//String text1 = "System sends to the server of the amazon a registration request";
+		
+		//String text1 = "system saves the data in repository";
+		
+		//String text1 = "system gets data from repository";
+		
+		//String text1 = "Administrator types the name of the channel and the URL of the news service and selects Add channel";
+		
+		//String text1 = "system prints the name of the user";
+		
+		//String text1 = "selects envelope";
+		//String text1 = "file was updated by the user";
+		//String text1 = "user clicks on the screen";
+		
+		//String text1 = "user clicks the mouse on the screen";
+		
+		
+		//String text1 = "Customer examines the bid";
+		//String text1="I really  like it";
+		//String text1 ="The system informs the user that the battery is full";
+		//String text1 ="The system sends the user an email";
+		
+		//String text1 ="system returns to step 1.1";
+		//String text1 ="system go to step 1";
+		//String text1 = "User fills 3 forms";
+		
+		//String text1 ="User informs their login and password";
+		//String text1 ="User register or delete transactions";
+		
+		//String text1 ="system displays the numbers about the set of possible criteria";
+		
+		//String text1 ="system displays set of possible criteria";
+		
+		
+		//String text1 = "Set of users register forms";
+		//String text1 = "I love French fries";
+		
+		//String text1 = "The Broker system broadcasts the order";
+		//String text1 ="Broker system broadcasts customer's information";
+		
+		//String text1 = "The broker system carry out the order";
+		
+		//String text1 = "user log in to the system";
+		
+		//String text1 = "user wants to change their pin";
+		
+		//String text1 = "ATM verifies with the Bank that the User has enough money in account";
+
+		//String text1 ="user select option for adding new clients";
+		
+		//String text1 ="user signals the system to proceed the transaction";
+		
+		//String text1 = "Administrator chooses a group containing the channel he wants to delete";
+		
+		//String text1 = "The system shall send a message to the receiver, and it provides an acknowledge message";
+		//String text1 = "The system shall send a message to the receiver, and it provides an acknowledgement message";
+		
+		//String text1 = "The System receives news messages and stores them in a local database";
+		
+		//String text1 ="user register everyone";
+		//String text1 ="user informs her login";
+		
+		//String text1 = "The Customer provides her Credit Card information";
+		
+		//String text1 ="The Broker System asks the Customer for Credit Card information";
+		
+		//String text1 = "The Broker System asks a Payment System to process the Customer's Payment";
+		
+		//String text1 ="ATM prompts her to enter new PIN";
+
+		
+		
+		//String text1 = "System adds a new client to the database and informs user about it";
+		
+		
+		
+		//String text1 = "search";
+		
+		//String text1 = "User creates filter for searching";
+		
+		
+		
+		//String text1 = "Administrator types the message and posts it";
+		
+		//String text1 = "System displays a list of defined channel groups and an add/delete group menu";
+		
+		//String text1 = "Administrator chooses a group to which he wants to ADD A NEW CHANNEL";
+		
+		
+		//String text1 = "User types in the numbers of his PIN and presses the Enter button"; //PIN: Indirect?
+		
+		//String text1 = "User selects the channels he/she wants to subscribe and/or deselects already subscribed channels to unsub-scribe them and chooses the Change subscription options";
+		
+		
+		
+		
+		//FIX
+		
+		//String text1 = "user signals you to proceed the transaction";
+		
+		//String text1 = "System informs user about that fact";
+		
+		String text1 = "User select a client for whom new contract will be added";
+		
+		
+		//String text1 = "User selects fields to be included in the report and rules to filter values from database"; //rules: VBZ? --> OK, Confusing-complex sentence
+		
+		//String text1 = "System assigns an expiry date and time to each incoming message"; //Time: verb?  -> FIXED
+		
+		//String text1 = "System displays a list of groups with subscribed channels and the number of new messages in each of them";//them: implicit
+		
+		//String text1 = "Bank retrieves User`s current balance from their account"; // their: implicit
+		
+		//String text1 = "Use case ends when user logs out or selects different option"; // selects: Action-Verb? --> modifier-action-verb
+		
+		//String text1 = "Administrator selects the channel(s) he wants to delete and chooses the Delete option";
+		
+		//String text1 = "Administrator chooses a group to which he wants to ADD A NEW CHANNEL";
+		
+		//String text1 = "System asks the user if he/she wants to register";
+				
+		//String text1 = "User confirms he/she wants to register";
+		
+		//String text1 = "User selects the channels he/she wants to subscribe and/or deselects already subscribed channels to unsubscribe them and chooses the Change subscription options";
+		
+		//String text1 = "If the user is already registered, the system automatically updates news messages from subscribed channels (refer to DOWNLOAD NEWS use case). If no, the system attempts to REGISTER A NEW USER (refer to Register a new user use case)";
+		
+				
+		
+		//String text1 ="Subscribe/unsubscribe news channels"; // FIX: unsubscribe is NN?
+		
+				
+		//String text1 = "System queries the database for news messages, whose expiry date and time have passed";
+		
+		//String text1 = "search";
+		
+		 
+		//String text1 = "Log in to the system";
+		
+		//String text1 = "back to step 2";
+		
+		//String text1 = "Administrator adds more channels. Proceed to step 7";//channels: subject?
+		
+		
+		//System displays a tree view of available groups and channels and marks those already subscribed by the user
+		//marks is OK VERB
+		
+		
+		
+		
+		
+		//String text1 = "System informs user about that";
+		
+		//String text1 = "System displays an information that it cannot be used without prior registration"; //registration : subject?
+		
+		//String text1 = "User reads the message and closes it or uses a hyperlink to go to the full message";
+		
+		text1 = text1.toLowerCase();
+		text1 = ScenarioCleaner.cleanSentence(text1);
+				
+		CustomSentenceNlpInfo nlpInfo = nlpAnalyzer.getSentenceComponents(text1);
+				
+		HashMap<Integer, CustomToken> subjectTokens = nlpInfo.getSubjects();
+		HashMap<Integer, CustomToken> mainActionVerbTokens = nlpInfo.getMainActionVerbs();
+		HashMap<Integer, CustomToken> complementActionVerbTokens = nlpInfo.getComplementActionVerbs();
+		HashMap<Integer, CustomToken> complementSubjectTokens = nlpInfo.getComplementSubjects();
+		HashMap<Integer, CustomToken> modifierActionVerbTokens = nlpInfo.getModifierActionVerbs();
+		HashMap<Integer, CustomToken> modifierSubjectTokens = nlpInfo.getModifierSubjects();
+		HashMap<Integer, CustomToken> directObjectTokens = nlpInfo.getDirectObjects();
+		HashMap<Integer, CustomToken> indirectObjectTokens = nlpInfo.getIndirectObjects();
+			
+		
+		// Displaying HashMap elements
+				System.out.println("Subjects HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : subjectTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Action-Verbs HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : mainActionVerbTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Complement Action-Verbs HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : complementActionVerbTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Complement Subjects HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : complementSubjectTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Modifier Action-Verbs HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : modifierActionVerbTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Modifier Subjects HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : modifierSubjectTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Direct Objects HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : directObjectTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+				System.out.println("Indirect Objects HashMap contains: ");
+				for (Map.Entry<Integer, CustomToken> entry : indirectObjectTokens.entrySet()) {
+					System.out.println(entry.getKey() + " = " + entry.getValue().getWord() + " " + entry.getValue().getPosTag() + " " + entry.getValue().getIndex());
+				}
+		
+    }
 }
 
