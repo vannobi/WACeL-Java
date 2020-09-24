@@ -11,7 +11,8 @@ import java.io.Serializable;
 public enum NodeTypeEnum implements Serializable{
 	PLACE("P", "PLACE"),
 	PLACE_WITH_TOKEN("PT", "PLACE WITH TOKEN"),
-	TRANSITION("T", "TRANSITION");
+	TRANSITION("T", "TRANSITION FROM EPISODE"),
+	TRANSITION_ALTERNATIVE("TA", "TRANSITION FROM ALTERNATIVE");
 	
 	private String acronym;
 	private String description;

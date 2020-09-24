@@ -351,7 +351,7 @@ public class PetriNet implements Serializable {
 	@Atores: sistema.
 	@Recursos: name.
 	 **/
-	public Node findtransitionByNameWithTraceNonSequential(String name) {
+	public Node findTransitionByNameWithTraceNonSequential(String name) {
 		Node result = null;
 		//@episodio1: Look up the node with the given name  in the petriNet.
 		//TBD: equals or contains?

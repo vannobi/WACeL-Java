@@ -47,6 +47,22 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 		List<Defect> defects = new ArrayList<Defect>();
 		//Episode 3: Check the absence of non-determinism: A non-deterministic behavior occurs when a set of operations are simultaneously enabled 
 		//indicator: Petri-Net with simultaneously enabled operations
+		if(pnAnalysisresult.contains("<br/><b>Simultaneously enabled transitions:</b>") ) {
+			String enabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Simultaneously enabled transitions:</b>", "</ul>");
+			Defect defect = new Defect();
+			defect.setQualityProperty(QualityPropertyEnum.NON_INTERFERENTIAL.getQualityProperty());
+			defect.setScenarioId(mainScenario.getId());
+			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
+			defect.setIndicator(DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getDefectIndicator());
+			if(enabledTransitions != null)
+				defect.setIndicator(defect.getIndicator().replace("<indicator>", enabledTransitions));
+			else
+				defect.setIndicator(defect.getIndicator().replace("<indicator>", pnAnalysisresult));
+			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+			defect.setFixRecomendation(DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getFixRecomendation());
+			defects.add(defect);
+
+		}
 		
 		//Episode 4: Check the absence of overflow: An executable model is overflowed when the number of elements in some communication channel or resource exceeds a finite capacity.
 		//indicator: Petri-Net is not bounded, i.e, It contains overflowed resources
@@ -104,7 +120,7 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 		if(pnAnalysisresult.contains("<b>Never enabled transitions:</b>")) {
 			live = false;
 			//never enabled
-			String neverEnabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Never enabled transitions:</b>", "<br/>");
+			String neverEnabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Never enabled transitions:</b>", "<br/><br/>");
 			
 			Defect defect = new Defect();
 			defect.setQualityProperty(QualityPropertyEnum.LIVENESS.getQualityProperty());

@@ -880,8 +880,8 @@ public class PetriNetServiceImpl implements IPetriNetService {
 					String alternativeSolutionLabel = alternativeSolution.length() > 50 ? alternativeSolution.substring(0, 50) : alternativeSolution;
 
 					Node transitionSolution = new Node(alternativeSolution ,
-							scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION.getAcronym() + LABEL_COMPONENTS_DELIMITER + alternativeId + LABEL_COMPONENTS_OTHER_DELIMITER + indexSolution + LABEL_COMPONENTS_DELIMITER + alternativeSolutionLabel,
-							ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement().replace("<id>", alternativeId), NodeTypeEnum.TRANSITION);
+							scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION_ALTERNATIVE.getAcronym() + LABEL_COMPONENTS_DELIMITER + alternativeId + LABEL_COMPONENTS_OTHER_DELIMITER + indexSolution + LABEL_COMPONENTS_DELIMITER + alternativeSolutionLabel,
+							ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement().replace("<id>", alternativeId), NodeTypeEnum.TRANSITION_ALTERNATIVE);
 					//POSITIONS
 					transitionSolution.setPositionX(currentPositionX);
 					transitionSolution.setPositionY(currentPositionY);
@@ -1085,7 +1085,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 				int indexScenario = 0;
 				for(StructuredScenario scenario : sortedExplicitNonSeqScenarios) {
 					//Transition (episode) between a non-sequential group (parallel or concurrent)
-					Node transition = mainPetriNet.findtransitionByNameWithTraceNonSequential(scenario.getTitle().toUpperCase().trim());
+					Node transition = mainPetriNet.findTransitionByNameWithTraceNonSequential(scenario.getTitle().toUpperCase().trim());
 					if(transition != null) {
 						PetriNet petriNet = transformScenario(scenario, transition.getPositionX(), transition.getPositionY() - INCREMENT_Y);
 						Arc arc = petriNet.removeArcBetweenNodes(petriNet.getFinalTransition(), petriNet.getStartPlace());
@@ -1270,7 +1270,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 			Node parentTranstion = null;
 			incidentNodes = mainPetriNet.getIncidentNodes(inputDummyPlace);
 			for(Node incident : incidentNodes) {
-				if(incident.getType().equals(NodeTypeEnum.TRANSITION)) {
+				if(incident.getType().equals(NodeTypeEnum.TRANSITION)) { //FIX: TRANSITION FROM ALTERNATIVE?
 					parentTranstion = incident;
 					break;
 				}
