@@ -16,8 +16,8 @@ public enum DefectIndicatorEnum implements Serializable{
 	NON_MINIMALITY_INDICATOR("The sentence <mark><sentence></mark> contains a Text after a dot, hyphen, semicolon or other punctuation mark {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
 	READABILITY_DIFFICULT_INDICATOR("The sentence <mark><sentence></mark> is difficult-to-read {<b><i><indicator></i></b>}.", "<i>Check that sentence contains only significant information like the main verb, direct object and optionally the subject</i>"),
 	//Completeness
-	ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR("The title <mark><sentence></mark> contains more than one action-verb, subject or object  {<b><i><indicator></i></b>}", "<i>Split the scenario into multiple scenarios or remove one action-verbs or objects</i>"),
-	ATOMICITY_GOAL_MULTIPLE_PURPOSE_INDICATOR("The goal <mark><sentence></mark> contains more than one main verb, subject or object {<b><i><indicator></i></b>}", "<i>Split the scenario into multiple scenarios or remove one action-verbs or objects</i>"),
+	ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR("The title <mark><sentence></mark> contains conjunction or disjunction of verbs or subjects  {<b><i><indicator></i></b>}", "<i>Split the scenario into multiple scenarios or remove one action-verbs or objects</i>"),
+	ATOMICITY_GOAL_MULTIPLE_PURPOSE_INDICATOR("The goal <mark><sentence></mark> has more than one main verb {<b><i><indicator></i></b>}", "<i>Split the scenario into multiple scenarios or remove one action-verb</i>"),
 	ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR("Unnecessary <i>Subjects</i> {<b><i><indicator></i></b>} in the title <mark><sentence></mark>", "<i>It is not necessary subjects in Title</i>"),
 	ATOMICITY_TITLE_ACTION_VERB_NOT_IN_INFINITIVE_FORM_INDICATOR("<i>Action-Verb</i> {<b><i><indicator></i></b>} in the title <mark><sentence></mark> is not in INFINITIVE (base) FORM", "<i>Inform an Action-Verb in infinitive form</i>"),
 	ATOMICITY_TITLE_MISSING_ACTION_VERB_INDICATOR("Missing <i>Action-Verb</i> in the title <mark><sentence></mark>", "<i>Inform an Action-Verb in infinitive form</i>"),
@@ -27,26 +27,26 @@ public enum DefectIndicatorEnum implements Serializable{
 	SIMPLICITY_EPISODE_MORE_THAN_ONE_SENTENCE_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>sentence</i>", "<i>Split the sentence into multiple sentences</i>"),
 	SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>Subject</i> {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
 	SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>Action-Verb</i> {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
-	SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>Complement-Action-Verb (coordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
-	SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>Modifier-Action-Verb (SUBordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
+	SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>Complement-Action-Verb (subordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
+	SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR("The episode sentence <mark><sentence></mark> contains more than one <i>Modifier-Action-Verb (coordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the sentence into multiple sentences</i>"),
 	
 	SIMPLICITY_EPISODE_MISSING_SUBJECT_INDICATOR("Missing <i>Subject</i> in the episode sentence <mark><sentence></mark>", "<i>IF sentence does not reference another scenario THEN Inform who (Subject) performs the Action-Verb</i>"),
 	SIMPLICITY_EPISODE_MISSING_OBJECT_INDICATOR("Missing <i>Object</i> in the episode sentence <mark><sentence></mark>", "<i>Inform who (Object) is impacted by the Action-Verb</i>"),
 	SIMPLICITY_EPISODE_MISSING_ACTION_VERB_INDICATOR("Missing <i>Action-Verb</i> in the episode sentence <mark><sentence></mark>", "<i>Inform an Action-Verb an action-verb in the present simple tense and active form</i>"),
 	
-	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SENTENCE_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Sentence</i>", "<i>Split the solution into multiple sentences</i>"),
+	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SENTENCE_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Sentence</i>", "<i>Split the solution into multiple solution steps</i>"),
 		
-	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR("Alternative solution step <mark><sentence></mark> contains more than one <i>Subject</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple sentences</i>"),
-	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Action-Verb</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple sentences</i>"),
-	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Complement-Action-Verb (coordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple sentences</i>"),
-	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Modifier-Action-Verb (subordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple sentences</i>"),
+	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR("Alternative solution step <mark><sentence></mark> contains more than one <i>Subject</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple solution steps</i>"),
+	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Action-Verb</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple solution steps</i>"),
+	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Complement-Action-Verb (subordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple solution steps</i>"),
+	SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR("The alternative solution step <mark><sentence></mark> contains more than one <i>Modifier-Action-Verb (coordinate clause)</i> {<b><i><indicator></i></b>}", "<i>Split the solution into multiple solution steps</i>"),
 	
 	SIMPLICITY_ALTERNATIVE_MISSING_OBJECT_INDICATOR("Missing <i>Object</i> in the alternative solution step <mark><sentence></mark>", "<i>Inform an Object after the Action-Verb</i>"),
 	SIMPLICITY_ALTERNATIVE_MISSING_ACTION_VERB_INDICATOR("Missing <i>Action-Verb</i> in the alternative solution step <mark><sentence></mark>", "<i>Inform an Action-Verb an action-verb in the present simple tense and active form</i>"),
 	
-	SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_THIRD_FORM_INDICATOR("The pisode sentence<mark><sentence></mark> contains an Action-verb {<b><i><indicator></i></b>} not in the <i>third form </i>", "<i>Use an action-verb in the present simple tense and active form</i>"),
+	SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_THIRD_FORM_INDICATOR("The pisode sentence<mark><sentence></mark> contains an Action-verb {<b><i><indicator></i></b>} not in the <i>third form </i>", "<i>IF sentence do not reference another scenario THEN Use an action-verb in the present simple tense and active form</i>"),
 	SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_INFINITIVE_FORM_INDICATOR("The pisode sentence<mark><sentence></mark> references to another scenario and contains an Action-verb {<b><i><indicator></i></b>} not in the <i>infinitive form </i>", "<i>Use an action-verb in the infinitive form, when reference to another scenario</i>"),
-	SIMPLICITY_ALTERNATIVE_ACTION_VERB_NOT_IN_THIRD_OR_BASE_FORM_INDICATOR("The alternative solution step <mark><sentence></mark> contains an Action-verb {<b><i><indicator></i></b>} not in the <i>third or infinitive form</i>", "<i>Use an action-verb in the present simple tense and active form (or infinitive form)</i>"),
+	SIMPLICITY_ALTERNATIVE_ACTION_VERB_NOT_IN_THIRD_OR_BASE_FORM_INDICATOR("The alternative solution step <mark><sentence></mark> contains an Action-verb {<b><i><indicator></i></b>} not in the <i>third or infinitive form</i>", "<i>IF sentence do not reference another scenario THEN Use an action-verb in the present simple tense and active form (or infinitive form)</i>"),
 	
 	
 	SIMPLICITY_TITLE_UNNECESSARY_INFORMATION_INDICATOR("The Title <mark><sentence></mark> contains <i>unnecessary information</i> {<b><i><indicator></i></b>}", "<i>Remove unnecessary information</i>"),
@@ -68,7 +68,7 @@ public enum DefectIndicatorEnum implements Serializable{
 	UNIFORMITY_MISSING_EPISODES_INDICATOR("Missing <i>Episodes</i>", "<i>Inform at least one Episode</i>"),
 	
 	UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR("The episode <mark><sentence></mark> does not contain its relevant parts: {<mark><b><i><indicator></i></b></mark>}", "<i>1. IF episode is Conditional or Loop THEN inform at least: Id/Step, Condition and Sentence; <br/>2. IF episode is Simple THEN inform at least: Id/Step and Sentence;</i>"),
-	UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR("The alternate/exception <mark><sentence></mark> does not contain its relevant parts: {<mark><b><i><indicator></i></b></mark>}", "<i>Inform: Id/Step, Cause or Solution</i>"),
+	UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR("The alternate/exception <mark><sentence></mark> does not contain its relevant parts: {<mark><b><i><indicator></i></b></mark>}", "<i>Inform: Id/Step, Cause and Solution</i>"),
 	
 	UNIFORMITY_MISSING_EPISODES_GROUP_INDICATOR("Incomplete <i> non-sequential construct</i> in non-sequential episodes delimited by <i># ... #</i>", "<i>Complete the non-sequential construct <i># ... #</i> </i>"),
 	

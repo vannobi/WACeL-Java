@@ -9,7 +9,7 @@ import java.util.Arrays;
 public final class Unambiguity {
 	
 	public static final ArrayList<String> WEAK_WORDS_PHRASES = 
-			new ArrayList<String>(Arrays.asList("can", "could", "may", "might", "ought to", "preferred", "should", "will", "would"));
+			new ArrayList<String>(Arrays.asList("can", "could", "may", "might", "ought", "preferred", "should", "will", "would")); //"ought to"
 	
 	public static final ArrayList<String> VAGUE_WORDS_PHRASES = 
 			new ArrayList<String>(Arrays.asList("adaptability", "additionally", "adequate", "aggregate", "also", "ancillary", "arbitrary", 
@@ -27,7 +27,7 @@ public final class Unambiguity {
 					, "regardless of", "relevant", "respective", 
 					"robust", "routine", "sufficiently", "sequential", "significant", "simple", "specific", "strong", 
 					"there", "there is", "transient", "transparent", "timely", "undefinable", "understandable", 
-					"unless", "unnecessary", "useful", "various", "varying"));
+					"unless", "unnecessary", "useful", "various", "varying", "required"));
 	
 	public static final ArrayList<String> SUBJECTIVE_WORDS_PHRASES = 
 			new ArrayList<String>(Arrays.asList("similar", "better",  "similarly", "worse", "having in mind", "take into account", "take into consideration", "as possible"));
@@ -51,11 +51,10 @@ public final class Unambiguity {
 					"our", "ours", "ourselves", "she", "someone", "somebody", "something",  "their", "theirs", 
 					"them", "themselves", "these", "they", "this", "those", "us", "we", "what", "whatever", "which",  
 					"whichever", "who", "whoever", "whom", "whomever", "whose", "whosever", "you", "your", "yours", "yourself", "yourselves", "previous"
-					, "next", "following", "last", "above", "below"));
-	//add "that"
+					, "next", "following", "last", "above", "below", "that"));
 	
-	public static final ArrayList<String> NON_MINIMAL_WORDS_PHRASES = 
-			new ArrayList<String>(Arrays.asList("\\.", "\\;", "\\:", "\\!", "\\?"));
+	public static final ArrayList<String> NON_MINIMAL_WORDS_PHRASES = new ArrayList<String>(Arrays.asList(".", ";", ":", "!", "?")); 
+			//new ArrayList<String>(Arrays.asList("\\.", "\\;", "\\:", "\\!", "\\?"));
 	
 	//Positive Indicators	
 	public static final ArrayList<String> DIRECTIVE_WORDS_PHRASES = 

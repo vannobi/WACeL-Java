@@ -47,69 +47,57 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 	 */
 	public List<Defect> checkAtomicity(StructuredScenario structuredScenario) {
 		List<Defect> defects = new ArrayList<Defect>();
+		CustomSentenceNlpInfo titleNlp = structuredScenario.getTitleNlp();
+		
 		//@Episode 1: Check that Title defines exactly one situation (WARNING);
 		for (String indicator : Unambiguity.MULTIPLE_WORDS_PHRASES) {
-			String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT; 
-			String replacement = "<mark>" + indicator + "</mark>";
-			if (structuredScenario.getTitle() != null && !structuredScenario.getTitle().isEmpty()) {
-				//Indicator: The title contains more than one action-verb, subject or object			
-				String newTitle = structuredScenario.getTitle().replaceAll(regExpWord, replacement);
-				if (!newTitle.equals(structuredScenario.getTitle())) {
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-					defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newTitle));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getFixRecomendation());
-					defects.add(defect)	;
-					break;
-				}	
+			if (titleNlp != null) {
+				//Indicator: The title contains more than one action-verb, subject or object
+				for (CustomToken token : titleNlp.getTokens()) {
+					if(token.getWord().equals(indicator)) {
+						Defect defect = new Defect(); 
+						defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
+						defect.setScenarioId(structuredScenario.getId());
+						defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
+						defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getDefectIndicator());
+						defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
+						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
+						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+						defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getFixRecomendation());
+						defects.add(defect)	;
+						break;
+					}
+				}
 			}
-			//@Episode 2: Check that Goal defines exactly one situation (WARNING)
+			
+			//@Episode 2: Check that Goal defines exactly one purpose (WARNING)
 			if (structuredScenario.getGoal() != null && !structuredScenario.getGoal().isEmpty()) {
 				//Indicator: The goal contains more than one action-verb, subject or object			
-				String newGoal = structuredScenario.getGoal().replaceAll(regExpWord, replacement);
-				if (!newGoal.equals(structuredScenario.getGoal())) {
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
-					defect.setIndicator(DefectIndicatorEnum.ATOMICITY_GOAL_MULTIPLE_PURPOSE_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", newGoal));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_GOAL_MULTIPLE_PURPOSE_INDICATOR.getFixRecomendation());
-					defects.add(defect)	;
-					break;
-				}	
+				
 			}
 		}
 
 		//@Episode 3: Check that Title contains a verb in infinitive (base) form and an object (WARNING)
 		//NLP
-		CustomSentenceNlpInfo sentenceComponents = structuredScenario.getTitleNlp();
-		if(sentenceComponents != null) {
+		if(titleNlp != null) {
 			//More that one sentences
 			
 			//Indicator: Unnecessary Subjects in the title
-			if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty()) {
+			if(titleNlp.getSubjects() != null && !titleNlp.getSubjects().isEmpty()) {
 				Defect defect = new Defect(); 
 				defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
 				defect.setScenarioId(structuredScenario.getId());
 				defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 				defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR.getDefectIndicator());
 				defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getSubjectsAsString()));
+				defect.setIndicator(defect.getIndicator().replace("<indicator>", titleNlp.getSubjectsAsString()));
 				defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
 				defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR.getFixRecomendation());
 				defects.add(defect)	;
 			}
 			//Indicator: Missing Object in the title
-			if((sentenceComponents.getDirectObjects() == null || sentenceComponents.getDirectObjects().isEmpty())
-					&& (sentenceComponents.getIndirectObjects() == null || sentenceComponents.getIndirectObjects().isEmpty())) {
+			if((titleNlp.getDirectObjects() == null || titleNlp.getDirectObjects().isEmpty())
+					&& (titleNlp.getIndirectObjects() == null || titleNlp.getIndirectObjects().isEmpty())) {//OK?
 				Defect defect = new Defect(); 
 				defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
 				defect.setScenarioId(structuredScenario.getId());
@@ -122,7 +110,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				defects.add(defect)	;
 			}
 			//Indicator: Missing Action-Verb in the title
-			if(sentenceComponents.getMainActionVerbs() == null || sentenceComponents.getMainActionVerbs().isEmpty()) {
+			if(titleNlp.getMainActionVerbs() == null || titleNlp.getMainActionVerbs().isEmpty()) {
 				Defect defect = new Defect(); 
 				defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
 				defect.setScenarioId(structuredScenario.getId());
@@ -135,20 +123,20 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				defects.add(defect)	;
 			} else {
 				//Indicator: The title contains more than one Action-Verb
-				if(sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
+				if(titleNlp.getMainActionVerbs().entrySet().size() > 1) {
 					Defect defect = new Defect(); 
 					defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
 					defect.setScenarioId(structuredScenario.getId());
 					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
 					defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator());
 					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+					defect.setIndicator(defect.getIndicator().replace("<indicator>", titleNlp.getMainActionVerbsAsString()));
 					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 					defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
 					defects.add(defect)	;
 				}
 				//Indicator: Action-Verb in the title is not in INFINITIVE (base) FORM
-				for (Map.Entry<Integer, CustomToken> entry : sentenceComponents.getMainActionVerbs().entrySet()) {
+				for (Map.Entry<Integer, CustomToken> entry : titleNlp.getMainActionVerbs().entrySet()) {
 		 		    if(!entry.getValue().getPosTag().equals(PosTagEnum.VB.name()) && !entry.getValue().getPosTag().equals(PosTagEnum.VBP.name())) {
 		 		    	Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
@@ -177,8 +165,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 	 */
 	public List<Defect> checkSimplicity(StructuredScenario structuredScenario) {
 		List<Defect> defects = new ArrayList<Defect>();
-		//@Episódio 1: Check that each Episode-Sentence consists of a verb and an object (or prepositional object). If sentence is not expressed by another use case, check that sentence contains a subject . (WARNING);
-		//@Episódio 2: Check that Episode-Sentence is described: from user point of view (present simple tense and active form of verb), or by another use case (infinitive - base form). (WARNING);
+		//@Episódio 1: Check that Episode-Sentence is described from user point of view (Subject + present simple tense and active form of verb + Object), or by another scenario (infinitive verb - base form + Object) [8][9][24][42] (Warning)
 		//NLP
 		
 		if(!structuredScenario.getEpisodes().isEmpty()) {
@@ -188,10 +175,10 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				numEpisode++;	
 				if(episode.getId() != null && !episode.getId().isEmpty())
 					episodeId = episode.getId(); 
-				CustomSentenceNlpInfo sentenceComponents = episode.getSentenceNlp();
-				if(sentenceComponents != null) {
+				CustomSentenceNlpInfo episodeNlpInfo = episode.getSentenceNlp();
+				if(episodeNlpInfo != null) {
 					//Indicator: The episode sentence contains more than one Sentence
-					if(sentenceComponents.getNumSentences() > 1) {
+					if(episodeNlpInfo.getNumSentences() > 1) {
 						Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 						defect.setScenarioId(structuredScenario.getId());
@@ -206,13 +193,13 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					//Check that sentence reference to another scenario (sub-scenario)
 					boolean referenceSubscenario = false;
 					String actionVerb = null;
-					if(sentenceComponents.getMainActionVerbs() != null && !sentenceComponents.getMainActionVerbs().isEmpty() && sentenceComponents.getMainActionVerbs().size() > 0)
-						actionVerb = sentenceComponents.getMainActionVerbsAsStringList().get(0);
+					if(episodeNlpInfo.getMainActionVerbs() != null && !episodeNlpInfo.getMainActionVerbs().isEmpty() && episodeNlpInfo.getMainActionVerbs().size() > 0)
+						actionVerb = episodeNlpInfo.getMainActionVerbsAsStringList().get(0);
 					if(actionVerb != null && episode.getSentence().contains(actionVerb.toUpperCase())) //FIX: get referenced scenario
 						referenceSubscenario = true;
 					
 					//Indicator: The episode sentence contains more than one Subject
-					if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty() && sentenceComponents.getSubjects().size() > 1) {
+					if(episodeNlpInfo.getSubjects() != null && !episodeNlpInfo.getSubjects().isEmpty() && episodeNlpInfo.getSubjects().size() > 1) {
 						Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 						defect.setScenarioId(structuredScenario.getId());
@@ -220,7 +207,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 						defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR.getDefectIndicator());
 						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-						defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getSubjectsAsString()));
+						defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getSubjectsAsString()));
 						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 						defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR.getFixRecomendation());
 						defects.add(defect)	;
@@ -228,7 +215,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					} else {
 					//IF Episode-Sentence does not reference another scenario THEN Check Missing Subject
 						//Indicator: Missing Subject in the episode sentence
-						if(!referenceSubscenario && (sentenceComponents.getSubjects() == null || sentenceComponents.getSubjects().isEmpty())) {
+						if(!referenceSubscenario && (episodeNlpInfo.getSubjects() == null || episodeNlpInfo.getSubjects().isEmpty())) {
 							Defect defect = new Defect(); 
 							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 							defect.setScenarioId(structuredScenario.getId());
@@ -243,14 +230,14 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						}
 					}
 					//Indicator: Missing Object in the episode sentence
-					if((sentenceComponents.getDirectObjects() == null || sentenceComponents.getDirectObjects().isEmpty())
-							&& (sentenceComponents.getIndirectObjects() == null || sentenceComponents.getIndirectObjects().isEmpty())) {
+					if((episodeNlpInfo.getDirectObjects() == null || episodeNlpInfo.getDirectObjects().isEmpty())
+							&& (episodeNlpInfo.getIndirectObjects() == null || episodeNlpInfo.getIndirectObjects().isEmpty())) {
 						//IF subject is different of "system|use case|scenario"
 						//Ex. System terminates; use case ends
 						boolean isSystemActor = false;
-						if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty()
-								&& sentenceComponents.getSubjects().size()==1) {
-							CustomToken subject = (CustomToken) sentenceComponents.getSubjects().entrySet().iterator().next().getValue();
+						if(episodeNlpInfo.getSubjects() != null && !episodeNlpInfo.getSubjects().isEmpty()
+								&& episodeNlpInfo.getSubjects().size()==1) {
+							CustomToken subject = (CustomToken) episodeNlpInfo.getSubjects().entrySet().iterator().next().getValue();
 							if(subject.getWord().toLowerCase().matches(SYSTEM_DEVELOPED)) {
 								isSystemActor = true;			 		    		
 			 		    	}
@@ -270,7 +257,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						}
 					} 
 					//Indicator: Missing Action-Verb in the episode sentence
-					if(sentenceComponents.getMainActionVerbs() == null || sentenceComponents.getMainActionVerbs().isEmpty()) {
+					if(episodeNlpInfo.getMainActionVerbs() == null || episodeNlpInfo.getMainActionVerbs().isEmpty()) {
 						Defect defect = new Defect(); 
 						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 						defect.setScenarioId(structuredScenario.getId());
@@ -285,7 +272,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					} else {
 												
 						//Indicator: The episode sentence contains more than one Action-Verb
-						if(sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
+						if(episodeNlpInfo.getMainActionVerbs().entrySet().size() > 1) {
 							Defect defect = new Defect(); 
 							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 							defect.setScenarioId(structuredScenario.getId());
@@ -293,14 +280,14 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator());
 							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+							defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getMainActionVerbsAsString()));
 							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
 							defects.add(defect)	;
 							
 						}
 
-						for (Map.Entry<Integer, CustomToken> entry : sentenceComponents.getMainActionVerbs().entrySet()) {
+						for (Map.Entry<Integer, CustomToken> entry : episodeNlpInfo.getMainActionVerbs().entrySet()) {
 							//IF Episode-Sentence does not reference another scenario THEN action-verb must be described from user point of view, i.e., the present simple tense and active form;
 							//Indicator: The episode sentence contains an Action-verb not in the third form or infinitive form (when reference to other scenario)
 							if(!referenceSubscenario) {
@@ -326,7 +313,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						}
 						
 						//Indicator: The episode sentence contains more than one Complement-Action-Verb
-						if(sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
+						if(episodeNlpInfo.getComplementActionVerbs().entrySet().size() > 1) {
 							Defect defect = new Defect(); 
 							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 							defect.setScenarioId(structuredScenario.getId());
@@ -334,7 +321,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getDefectIndicator());
 							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+							defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getComplementActionVerbsAsString()));
 							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getFixRecomendation());
 							defects.add(defect)	;
@@ -342,7 +329,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						}
 						
 						//Indicator: The episode sentence contains more than one Modifier-Action-Verb
-						if(sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
+						if(episodeNlpInfo.getModifierActionVerbs().entrySet().size() > 1) {
 							Defect defect = new Defect(); 
 							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 							defect.setScenarioId(structuredScenario.getId());
@@ -350,7 +337,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
 							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getDefectIndicator());
 							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+							defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getModifierActionVerbsAsString()));
 							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getFixRecomendation());
 							defects.add(defect)	;
@@ -363,8 +350,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		}
 		
 
-		//@Episódio 3: Check that each Alternative-Solution step consists of a verb and an object (or prepositional object). Optionally, It contains a subject. (WARNING);
-		//@Episódio 4: Check that Alternative-Solution step is described: from user point of view (present simple tense and active form of verb), or in infinitive - base form. (WARNING);
+		//@Episódio 2: Check that Alternative-Solution-Step-Sentence is described: from user point of view (present simple tense and active form of verb + Object), or by another scenario (infinitive base form of verb + Object). Optionally, it contains a Subject [8][9][24][42]; (WARNING);
 		//NLP
 		if(!structuredScenario.getAlternative().isEmpty()) {
 			int numAlternative = 1;
@@ -378,10 +364,10 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					for (int i = 0; i < alternative.getSolution().size(); i++) {
 						String solution = alternative.getSolution().get(i);
 						if(solution != null && !solution.isEmpty()) {
-							CustomSentenceNlpInfo sentenceComponents = alternative.getSolutionNlp().get(i);
-							if(sentenceComponents != null) {
+							CustomSentenceNlpInfo solutionNlpInfo = alternative.getSolutionNlp().get(i);
+							if(solutionNlpInfo != null) {
 								//Indicator: The episode sentence contains more than one Sentence
-								if(sentenceComponents.getNumSentences() > 1) {
+								if(solutionNlpInfo.getNumSentences() > 1) {
 									Defect defect = new Defect(); 
 									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 									defect.setScenarioId(structuredScenario.getId());
@@ -397,13 +383,13 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 								//Check that sentence reference to another scenario (sub-scenario)
 								boolean referenceSubscenario = false;
 								String actionVerb = null;
-								if(sentenceComponents.getMainActionVerbs() != null && !sentenceComponents.getMainActionVerbs().isEmpty() && sentenceComponents.getMainActionVerbs().size() > 0)
-									actionVerb = sentenceComponents.getMainActionVerbsAsStringList().get(0);
+								if(solutionNlpInfo.getMainActionVerbs() != null && !solutionNlpInfo.getMainActionVerbs().isEmpty() && solutionNlpInfo.getMainActionVerbs().size() > 0)
+									actionVerb = solutionNlpInfo.getMainActionVerbsAsStringList().get(0);
 								if(actionVerb != null && solution.contains(actionVerb.toUpperCase()))
 									referenceSubscenario = true;
 
 								//Indicator: The alternative solution step contains more than one Subject
-								if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty() && sentenceComponents.getSubjects().size() > 1) {
+								if(solutionNlpInfo.getSubjects() != null && !solutionNlpInfo.getSubjects().isEmpty() && solutionNlpInfo.getSubjects().size() > 1) {
 									Defect defect = new Defect(); 
 									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 									defect.setScenarioId(structuredScenario.getId());
@@ -411,7 +397,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 									defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 									defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR.getDefectIndicator());
 									defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-									defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getSubjectsAsString()));
+									defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getSubjectsAsString()));
 									defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 									defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR.getFixRecomendation());
 									defects.add(defect)	;
@@ -420,14 +406,14 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 
 								}
 								////Indicator: Missing Object in the alternative solution step
-								if((sentenceComponents.getDirectObjects() == null || sentenceComponents.getDirectObjects().isEmpty())
-										&& (sentenceComponents.getIndirectObjects() == null || sentenceComponents.getIndirectObjects().isEmpty())) {
+								if((solutionNlpInfo.getDirectObjects() == null || solutionNlpInfo.getDirectObjects().isEmpty())
+										&& (solutionNlpInfo.getIndirectObjects() == null || solutionNlpInfo.getIndirectObjects().isEmpty())) {
 									//IF subject is different of "system|use case|scenario"
 									//Ex. System terminates; use case ends
 									boolean isSystemActor = false;
-									if(sentenceComponents.getSubjects() != null && !sentenceComponents.getSubjects().isEmpty()
-											&& sentenceComponents.getSubjects().size()==1) {
-										CustomToken subject = (CustomToken) sentenceComponents.getSubjects().entrySet().iterator().next().getValue();
+									if(solutionNlpInfo.getSubjects() != null && !solutionNlpInfo.getSubjects().isEmpty()
+											&& solutionNlpInfo.getSubjects().size()==1) {
+										CustomToken subject = (CustomToken) solutionNlpInfo.getSubjects().entrySet().iterator().next().getValue();
 										if(subject.getWord().toLowerCase().matches(SYSTEM_DEVELOPED)) {
 											isSystemActor = true;			 		    		
 						 		    	}
@@ -447,7 +433,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 									}
 								}
 								//Indicator: Missing Action-Verb in the alternative solution step
-								if(sentenceComponents.getMainActionVerbs() == null || sentenceComponents.getMainActionVerbs().isEmpty()) {
+								if(solutionNlpInfo.getMainActionVerbs() == null || solutionNlpInfo.getMainActionVerbs().isEmpty()) {
 									Defect defect = new Defect(); 
 									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 									defect.setScenarioId(structuredScenario.getId());
@@ -461,7 +447,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 									defects.add(defect)	;
 								} else {
 									//Indicator: The alternative solution step contains more than one Action-Verb
-									if(sentenceComponents.getMainActionVerbs().entrySet().size() > 1) {
+									if(solutionNlpInfo.getMainActionVerbs().entrySet().size() > 1) {
 										Defect defect = new Defect(); 
 										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 										defect.setScenarioId(structuredScenario.getId());
@@ -469,14 +455,14 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator());
 										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+										defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getMainActionVerbsAsString()));
 										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
 										defects.add(defect)	;
 									}
 								
 									//Indicator: The alternative solution step contains an Action-verb not in the third or infinitive form 
-									for (Map.Entry<Integer, CustomToken> entry : sentenceComponents.getMainActionVerbs().entrySet()) {
+									for (Map.Entry<Integer, CustomToken> entry : solutionNlpInfo.getMainActionVerbs().entrySet()) {
 										if(!entry.getValue().getPosTag().equals(PosTagEnum.VBZ.name()) && !entry.getValue().getPosTag().equals(PosTagEnum.VBP.name()) && !entry.getValue().getPosTag().equals(PosTagEnum.VB.name())) {
 											Defect defect = new Defect(); 
 											defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
@@ -495,7 +481,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 									}
 									
 									//Indicator: The alternative solution step contains more than one Complement-Action-Verb
-									if(sentenceComponents.getComplementActionVerbs().entrySet().size() > 1) {
+									if(solutionNlpInfo.getComplementActionVerbs().entrySet().size() > 1) {
 										Defect defect = new Defect(); 
 										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 										defect.setScenarioId(structuredScenario.getId());
@@ -503,14 +489,14 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getDefectIndicator());
 										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+										defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getComplementActionVerbsAsString()));
 										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getFixRecomendation());
 										defects.add(defect)	;
 									}
 									
 									//Indicator: The alternative solution step contains more than one Modifier-Action-Verb
-									if(sentenceComponents.getModifierActionVerbs().entrySet().size() > 1) {
+									if(solutionNlpInfo.getModifierActionVerbs().entrySet().size() > 1) {
 										Defect defect = new Defect(); 
 										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
 										defect.setScenarioId(structuredScenario.getId());
@@ -518,7 +504,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
 										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getDefectIndicator());
 										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getMainActionVerbsAsString()));
+										defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getModifierActionVerbsAsString()));
 										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
 										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getFixRecomendation());
 										defects.add(defect)	;
@@ -533,7 +519,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		
 		
 
-		//@Episódio 5: Check that Title does not contain extra unnecessary information  (INFORMATION)
+		//@Episódio 3: Check that Title does not contain extra unnecessary information  (INFORMATION)
 		List<String> extraInfTitle = ScenarioCleaner.checkExtraInformation(structuredScenario.getTitle());
 		//Indicator: The Title contains <i>unnecessary information
 		if (extraInfTitle != null && extraInfTitle.size() > 0 ) {
@@ -1988,7 +1974,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
 								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getContext().getPreConditions().toString()));
 								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getContext().getPreConditions().toString()));
-								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
+								defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
 								defect.setFixRecomendation(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_CONTEXT_PRE_CONDITIONS_COINCIDENCE_INDICATOR.getFixRecomendation());
 								defects.add(defect)	;
 							}
@@ -2153,8 +2139,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				for (Map.Entry<String, CustomToken> otherObject : objectsOtherSentenceWithoutDupl.entrySet()) {
 					boolean sameObject = false;
 					for (Map.Entry<String, CustomToken> object : unionObjectsWithoutDupl.entrySet()) {
-						if (object.getKey().endsWith(otherObject.getKey())
-								|| otherObject.getKey().endsWith(object.getKey())){
+						if (object.getKey().endsWith(otherObject.getKey()) || otherObject.getKey().endsWith(object.getKey())){
 							sameObject = true;
 							break;
 						}	
@@ -2195,8 +2180,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		}	
 
 		//IF they have the same action-verb and common objects THEN they are potentially duplicated
-		if (sameActionVerb && (totalDistinctObjects > 0 && (totalMatchingObjects/totalDistinctObjects) > 0 )
-								|| totalDistinctObjects == 0)
+		if (sameActionVerb && ((totalDistinctObjects > 0 && (totalMatchingObjects/totalDistinctObjects) > 0 ) || totalDistinctObjects == 0))
 			return true;
 		else 
 			return false;

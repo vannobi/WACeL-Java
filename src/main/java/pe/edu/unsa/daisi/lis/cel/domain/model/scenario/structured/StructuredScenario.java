@@ -33,7 +33,7 @@ public class StructuredScenario implements Serializable {
 	private Long projectId;
 	private String projectName;
 	
-	//NLP info about title and goal: tokens, subjetcs, verbs, objects, ....
+	//NLP info about title and goal: tokens, subjects, verbs, objects, ....
 	private CustomSentenceNlpInfo titleNlp;
 	private CustomSentenceNlpInfo goalNlp;
 

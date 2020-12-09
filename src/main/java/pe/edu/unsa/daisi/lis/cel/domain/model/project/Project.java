@@ -27,7 +27,7 @@ import pe.edu.unsa.daisi.lis.cel.domain.model.user.User;
 
 @Entity
 @Table(name="PROJECT")
-public class Project implements Serializable{
+public class Project implements Serializable {
 
 	/**
 	 * 

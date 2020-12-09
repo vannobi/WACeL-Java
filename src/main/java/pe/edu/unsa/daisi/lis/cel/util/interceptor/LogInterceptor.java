@@ -15,7 +15,7 @@ public class LogInterceptor {
 	 * Using this Regular expression, the aspect performs a pointcut
 	 * on every method call of Service Layer.
 	 */
-	@Around("execution(* ipp.aci.*.servicos.*.ServicosDe*.*(..))")
+	@Around("execution(* pe.edu.*.service.*.Service*.*(..))")
 	public void trackChangeService(ProceedingJoinPoint joinPoint) throws Throwable{
 		logger.info("Method about to change " + joinPoint.getSignature().getName());
 		

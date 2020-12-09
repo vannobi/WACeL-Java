@@ -2,7 +2,6 @@ package pe.edu.unsa.daisi.lis.cel.service.analysis.util.analyzer;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +9,10 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import pe.edu.unsa.daisi.lis.cel.util.RegularExpression;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CoreNLPAnalyzer;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CustomSentenceNlpInfo;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CustomToken;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.INLPAnalyzer;
-import pe.edu.unsa.daisi.lis.cel.util.nlp.OpenNLPAnalyzer;
-import pe.edu.unsa.daisi.lis.cel.util.nlp.dictionary.english.Unambiguity;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioCleaner;
 
 public class TestCoreNLPAnalyzer {
@@ -798,7 +794,17 @@ public class TestCoreNLPAnalyzer {
 		    	System.out.println(getWordsAsString(tokens));
 		    	//Pos tags
 		    	System.out.println(getPosTagsAsString(tokens));
-		    	assertEquals("[NN, VBZ, DT, NN, NN, CC, NN, TO, DT, JJ, NN]", getPosTagsAsString(tokens)); //FIX Rule PTR4: time/VBP  ????
+		    	assertEquals("[NN, VBZ, DT, NN, NN, CC, NN, TO, DT, JJ, NN]", getPosTagsAsString(tokens)); //FIX Rule PTR4: time/VBP  ???? --> FIXED!
+		    	
+		    	
+		    	
+		    	String text94 = "User selects fields to be included in the report and rules to filter values from database";
+		    	tokens = nlpAnalyzer.getTokens(text94);
+				//Tokens - words
+		    	System.out.println(getWordsAsString(tokens));
+		    	//Pos tags
+		    	System.out.println(getPosTagsAsString(tokens));
+		    	assertEquals("[NN, VBZ, NNS, TO, VB, VBN, IN, DT, NN, CC, NNS, TO, VBP, NNS, IN, NN]", getPosTagsAsString(tokens)); //FIX Rule PTR4: time/VBP  ???? --> FIXED!
 		    			    	
 		    	
 		    	/*
@@ -955,7 +961,7 @@ public class TestCoreNLPAnalyzer {
 		//String text1 = "Administrator chooses a group to which he wants to ADD A NEW CHANNEL";
 		
 		
-		//String text1 = "User types in the numbers of his PIN and presses the Enter button"; //PIN: Indirect?
+		String text1 = "User types in the numbers of his PIN and presses the Enter button"; //PIN: Indirect?
 		
 		//String text1 = "User selects the channels he/she wants to subscribe and/or deselects already subscribed channels to unsub-scribe them and chooses the Change subscription options";
 		
@@ -968,12 +974,17 @@ public class TestCoreNLPAnalyzer {
 		
 		//String text1 = "System informs user about that fact";
 		
-		String text1 = "User select a client for whom new contract will be added";
+		//String text1 = "User select a client for whom new contract will be added";
 		
 		
-		//String text1 = "User selects fields to be included in the report and rules to filter values from database"; //rules: VBZ? --> OK, Confusing-complex sentence
+		//String text1 = "User selects fields to be included in the report and rules to filter values from database"; //rules: VBZ? --> OK, Confusing-complex sentence --> FIXED!
 		
 		//String text1 = "System assigns an expiry date and time to each incoming message"; //Time: verb?  -> FIXED
+		
+		//String text1 = "User select a client for whom new contract will be added";
+		
+		//String text1 = "System checks if a group with the given name has not been already defined and if so, inserts the name of a new group into a database";
+		
 		
 		//String text1 = "System displays a list of groups with subscribed channels and the number of new messages in each of them";//them: implicit
 		
@@ -1003,7 +1014,7 @@ public class TestCoreNLPAnalyzer {
 		//String text1 = "search";
 		
 		 
-		//String text1 = "Log in to the system";
+		//String text1 = "log in to the system";
 		
 		//String text1 = "back to step 2";
 		
@@ -1022,6 +1033,11 @@ public class TestCoreNLPAnalyzer {
 		//String text1 = "System displays an information that it cannot be used without prior registration"; //registration : subject?
 		
 		//String text1 = "User reads the message and closes it or uses a hyperlink to go to the full message";
+		
+		
+		
+		//String text1 = "The business community like the current airport location have voiced their opposition to building the new airport 100km north of the city";
+		//String text1 = "Notify student the evaluation date ";
 		
 		text1 = text1.toLowerCase();
 		text1 = ScenarioCleaner.cleanSentence(text1);
